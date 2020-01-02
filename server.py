@@ -170,13 +170,13 @@ class JobsHandler(tornado.web.RequestHandler):
                     job = Masscan(t)
                 forkjob(job, massqueue)
                 jobids.append(job.ident)
-            self.write({'jobs': jobids})
+            self.write({'/jobs': jobids})
         elif typ == 'nmap':
             if foundonly: # only scan hosts found earlier with masscan
                 r = Results()
                 r.read_all('results')
                 hosts = filter_by_network(r.hosts, target, mask)
-                hosts = filter_by_missing_scan(r.hosts, 'nmap')
+                hosts = filter_by_missing_scan(hosts, 'nmap')
                 hostkeys = list(hosts.keys())
                 n = 32
                 hostkeylists = [hostkeys[i * n:(i + 1) * n] for i in range((len(hostkeys) + n - 1) // n )]
