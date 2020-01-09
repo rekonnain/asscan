@@ -18,7 +18,6 @@ def d(m):
 class ScraperJob(Job):
     def __init__(self, processes=4):
         super().__init__()
-        d("scraper job targets %s"%str(self.targets))
         self.path = 'results'
         self.scantype = 'scraper'
         # override
@@ -28,6 +27,7 @@ class ScraperJob(Job):
         self.scheme = ''
     
     def scan(self):
+        d("scraper job targets %s"%str(self.targets))
         if len(self.targets) == 0:
             d("scraper job: no targets, not doing shit")
             return
@@ -242,7 +242,7 @@ class Bluekeep(ScraperJob):
         os.chdir(self.ident)
 
         targetqueue = Queue(maxsize = 8)
-        os.system('../../scanners/blue.sh %s > output.txt'%' '.join(self.targets))
+        os.system('../../scanners/blue.sh %s |tee output.txt'%' '.join(self.targets))
         self.postprocess()
         sys.stderr.write("bluekeep task done\n")
 
@@ -250,7 +250,7 @@ class Bluekeep(ScraperJob):
         results = []
         #line looks like:
         # [*] 192.168.9.5:3389 - Cannot reliably check exploitability.
-        re_shit = re.compile('\[\*\]\s([^:]*):[0-9]+\s-\s(.*)')
+        re_shit = re.compile('\[.\]\s([^:]*):[0-9]+\s+-\s(.*)')
         for line in open('output.txt','r').readlines():
             m = re_shit.match(line.strip())
             if m and m.groups():

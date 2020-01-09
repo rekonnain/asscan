@@ -13,7 +13,7 @@ def filter_by_port(hosts, port):
     result = defaultdict(list)
     for key in hosts.keys():
         for scan in hosts[key]:
-            if str(port) in [x['port'] for x in scan['ports'] if 'state' in x and x['state'] == 'open']:
+            if str(port) in [x['port'] for x in scan['ports']]:
                 result[key].append(scan)
     return result
 
@@ -56,26 +56,38 @@ def filter_by_missing_scan(hosts, scantype):
 
 
 # horrendous hack
-def filter_by_vulns(hosts):
+def filter_by_bluekeep(hosts):
     filtered = {}
     for key in hosts.keys():
         for scan in hosts[key]:
             if scan['scantype'] == 'bluekeep'\
                 and 'target is vulnerable' in scan['ports'][0]['status']:
                 filtered[key] = hosts[key]
-                sys.stderr.write(scan['ports'][0]['status'] + '\n')
-            elif scan['scantype'] == 'ms17_010'\
-                 and 'Host is likely VULNERABLE' in scan['ports'][0]['status']:
-                filtered[key] = hosts[key]
-                sys.stderr.write(scan['ports'][0]['status'] + '\n')
+                #sys.stderr.write(scan['ports'][0]['status'] + '\n')
     return filtered
 
+def filter_by_ms17010(hosts):
+    filtered = {}
+    for key in hosts.keys():
+        for scan in hosts[key]:
+            if scan['scantype'] == 'ms17_010'\
+                 and 'Host is likely VULNERABLE' in scan['ports'][0]['status']:
+                filtered[key] = hosts[key]
+                #sys.stderr.write(scan['ports'][0]['status'] + '\n')
+    return filtered
+
+def filter_by_vulns(hosts):
+    filtered = filter_by_ms17010(hosts)
+    filtered.update(filter_by_bluekeep(hosts))
+    return filtered
+    
 def filter_by_screenshots(hosts):
     filtered = {}
     for key in hosts.keys():
         for scan in hosts[key]:
             if 'screenshot' in scan['scantype']:
                 filtered[key] = hosts[key]
+    return filtered
 
 class Results:
     def __init__(self):

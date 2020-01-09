@@ -68,21 +68,29 @@ class ResultsHandler(tornado.web.RequestHandler):
             service = self.get_query_argument('service', None)
             vulns = self.get_query_argument('vulns', None)
             screenshots = self.get_query_argument('screenshots', None)
+            sys.stderr.write('filtering: prefix=%s port=%s service=%s vulns=%s screenshots=%s\n'%(str(prefix), str(port), str(service), str(vulns), str(screenshots)))
             r = Results()
             r.read_all('results')
             filtered = r.hosts
+            sys.stderr.write('count all=%d\n'%(len(filtered.keys())))
             if prefix and len(prefix) > 0:
                 if not prefix[-1] == '.':
                     prefix += '.'
                 filtered = filter_by_prefix(filtered, prefix)
+                sys.stderr.write('count prefix=%d\n'%(len(filtered.keys())))
             if port and len(port) > 0:
                 filtered = filter_by_port(filtered, port)
+                sys.stderr.write('count port=%d\n'%(len(filtered.keys())))
             if service and len(service) > 0:
                 filtered = filter_by_service(filtered, service)
+                sys.stderr.write('count service=%d\n'%(len(filtered.keys())))
             if vulns and vulns == 'true':
                 filtered = filter_by_vulns(filtered)
+                sys.stderr.write('count vulns=%d\n'%(len(filtered.keys())))
             if screenshots and screenshots == 'true':
-                filtered = filter_by_vulns(filtered)
+                filtered = filter_by_screenshots(filtered)
+                sys.stderr.write('count screenshots=%d\n'%(len(filtered.keys())))
+            sys.stderr.write('count final=%d\n'%(len(filtered.keys())))
             self.write({'ips':list(filtered.keys())})
         elif args[0] == 'all':
             r = Results()
@@ -309,12 +317,18 @@ class JobsHandler(tornado.web.RequestHandler):
             hosts = r.hosts
             hosts = filter_by_network(hosts, target, mask)
             if foundonly:
-                sys.stderr.write('0: %s\n'%str(list(hosts.keys())))
+                #sys.stderr.write('0: %s\n'%str(list(hosts.keys())))
                 hosts = filter_by_port(hosts, port)
                 sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
             hostkeys = list(hosts.keys())
-            job = Bluekeep(hostkeys)
-            forkjob(job, scraperqueue)
+            n = 32
+            hostkeylists = [hostkeys[i * n:(i + 1) * n] for i in range((len(hostkeys) + n - 1) // n )]
+            jobids = []
+            for kl in hostkeylists:
+                job = Bluekeep(kl)
+                forkjob(job, scraperqueue)
+                jobids.append(job.ident)
+            self.write({'jobs': jobids})
             self.write({'jobid': job.ident})
         elif typ == 'ms17_010':
             # Fetch results for target subnet, only screenshot those with open ports

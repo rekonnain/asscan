@@ -210,7 +210,8 @@ class Nmap(ScanJob):
         else:
             args.append(self.target)
         self.cmdline = ' '.join(args)
-        super().run(args)
+        #super().run(args)
+        os.system(self.cmdline)
         meta = { 'scantype': 'nmap',
                  'jobid': self.ident,
                  'target': self.target}
