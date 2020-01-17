@@ -47,6 +47,14 @@
         @click="screenshots(screenshotsEnabled)"
       />Has screenshots
     </div>
+    <div class="text-black py-1 px-2 m-2 rounded focus:outline-none focus:shadow-outline">
+      <input
+        type="checkbox"
+        class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
+        v-model="hasNotes"
+        @click="notes(hasNotes)"
+      />Has notes
+    </div>
 
     <button
       type="button"
@@ -111,6 +119,12 @@ export default {
         screenshots: screenshotsEnabled
       });
     },
+    notes(hasNotes) {
+      this.$store.dispatch({
+        type: type.setNotes,
+        screenshots: hasNotes
+      });
+    },
     clear() {
       this.prefixfilter = "";
       this.portfilter = "";
@@ -135,6 +149,10 @@ export default {
         type: type.setScreenshots,
         screenshots: false
       });
+      this.$store.dispatch({
+        type: type.setNotes,
+        notes: false
+      })
     },
     apply() {
       console.log("apply");
@@ -158,6 +176,10 @@ export default {
         type: type.setScreenshots,
         screenshots: this.screenshotsEnabled
       });
+      this.$store.dispatch({
+        type: type.setNotes,
+        notes: this.hasNotes
+      })
     },
     refresh() {
       this.$store.dispatch({

@@ -4,8 +4,31 @@
   <div v-if="results[0]">
     <h2>{{ results[0]['ipv4']}}</h2>
     <p>
-      <a :href="'/api/results/ip/'+results[0]['ipv4']">Raw data</a>
+      <a class="underline" :href="'/api/results/ip/'+results[0]['ipv4']">Raw data</a>
     </p>
+
+    <div class="m-2 p-2 bg-gray-400">
+      <p>Notes</p>
+      <div v-if="note">
+        {{ note }}
+            <button
+      type="button"
+      @click="removenote()"
+      class="bg-blue-500 hover:bg-blue-700 text-white font-bold m-1 px-4 rounded"
+    >Delete note</button>
+
+      </div>
+      <div v-else>
+      <input
+        v-model="note"
+        type="text"
+        placeholder="Add a note here"
+        class="block flex-1 bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg ml-2 py-1 px-2 block w-full appearance-none leading-normal"
+        @keyup.enter="addnote(note)"
+      />
+      </div>
+      </div>
+
     <div class="m-2 p-2 bg-gray-400" v-for="result in results" :key="result['ipv4']">
       <p v-if="result['scantype']">Scan type: {{result['scantype']}}</p>
       <p v-if="result['cmdline']">Scanner args: <pre class="text-xs">{{result['cmdline']}}</pre></p>
@@ -109,6 +132,7 @@ export default {
 
   methods: {
     selectIp(ip) {
+        this.getNotes(ip)
       axios
         .get("/api/results/ip/" + ip)
         .then(response => this.handleResults(response.data, ip));
@@ -118,7 +142,29 @@ export default {
       console.log(results[ip])
       this.results = results[ip];
     },
-    createurl: utils.createurl
+    createurl: utils.createurl,
+    getNotes(ip) {
+      axios
+      .get("/api/notes/ip/" + ip)
+      .then(response => this.handleNotes(response.data, ip));
+    },
+    handleNotes(notes, ip) {
+      console.log("notes:")
+      console.log(notes[ip])
+      this.note = notes[ip]
+    },
+    addnote(note) {
+      const ip = this.$store.state.currentIp
+      console.log(ip)
+      const data = { [ip]: note }
+      axios.post("/api/notes/", data)
+      .then(this.selectIp(this.$store.state.currentIp))
+    },
+    removenote() {
+      this.note = false
+      axios.delete("/api/notes/" + this.$store.state.currentIp)
+      .then(this.selectIp(this.$store.state.currentIp))
+    }
   },
 
   watch: {

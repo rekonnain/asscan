@@ -5,6 +5,7 @@ from os.path import join, isfile, isdir
 import json, sys
 from scanners import ScanJob
 from collections import defaultdict
+import notes
 import ipaddress
 import os
 
@@ -45,6 +46,14 @@ def filter_by_network(hosts, address, mask):
             filtered[key] = hosts[key]
     return filtered
 
+def filter_by_having_notes(hosts):
+    noted = notes.hostswithcomments()
+    filtered = {}
+    for key in hosts.keys():
+        if key in noted:
+            filtered[key] = hosts[key]
+    return filtered
+        
 # useful but not exposed to the UI, I think
 # consider having a checkbox for this in the UI
 def filter_by_missing_scan(hosts, scantype):

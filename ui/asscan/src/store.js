@@ -10,6 +10,7 @@ export default new Vuex.Store({
         serviceFilter: '',
         vulns: false,
         screenshots: false,
+        notes: false,
     },
 
     getters: {
@@ -18,6 +19,7 @@ export default new Vuex.Store({
         prefixFilter: state => state.prefixFilter,
         vulns: state => state.vulns,
         screenshots: state => state.screenshots,
+        notes: state => state.notes,
     },
 
     actions: {
@@ -38,6 +40,9 @@ export default new Vuex.Store({
         },
         setScreenshots(context, value) {
             context.commit('setScreenshots', value.screenshots)
+        },
+        setNotes(context, value) {
+            context.commit('setNotes', value.notes)
         },
         refresh(context) {
             context.commit('refresh')
@@ -63,6 +68,9 @@ export default new Vuex.Store({
         },
         setScreenshots(state, screenshots) {
             state.screenshots = screenshots;
+        },
+        setNotes(state, notes) {
+            state.notes = notes;
         },
         refresh() { }
     },

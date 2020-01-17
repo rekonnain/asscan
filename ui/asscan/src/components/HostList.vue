@@ -47,6 +47,9 @@ export default {
     },
     screenshots() {
       return this.$store.state.screenshots;
+    },
+    notes() {
+      return this.$store.state.notes;
     }
   },
   methods: {
@@ -75,7 +78,8 @@ export default {
           "&vulns=" +
           this.$store.state.vulns +
           "&screenshots=" +
-          this.$store.state.screenshots
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -90,7 +94,8 @@ export default {
           "&vulns=" +
           this.$store.state.vulns +
           "&screenshots=" +
-          this.$store.state.screenshots
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -105,7 +110,24 @@ export default {
           "&vulns=" +
           this.$store.state.vulns +
           "&screenshots=" +
-          this.$store.state.screenshots
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
+      );
+      this.hosts = hostlist.data["ips"];
+    },
+    async updateWithNotes(notes) {
+      const hostlist = await axios.get(
+        "/api/results/filter?port=" +
+          this.$store.state.portFilter +
+          "&prefix=" +
+          this.$store.state.prefixFilter +
+          "&service=" +
+          this.$store.state.serviceFilter +
+          "&vulns=" +
+          this.$store.state.vulns +
+          "&screenshots=" +
+          this.$store.state.screenshots +
+          "&notes=" + notes
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -120,7 +142,8 @@ export default {
           "&vulns=" +
           this.$store.state.vulns +
           "&screenshots=" +
-          this.$store.state.screenshots
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -135,7 +158,8 @@ export default {
           "&vulns=" +
           vulns +
           "&screenshots=" +
-          this.$store.state.screenshots
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
       );
       this.hosts = hostlist.data["ips"];
     }
@@ -152,6 +176,9 @@ export default {
     },
     vulns(vulns) {
       this.updateWithVulns(vulns);
+    },
+    notes(notes) {
+      this.updateWithNotes(notes);
     },
     refresh() {
       console.log("vittu");

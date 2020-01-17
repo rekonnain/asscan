@@ -2,8 +2,10 @@
 
 import tornado.ioloop
 import tornado.web
+from tornado.escape import json_decode
 from multiprocessing import Process, Queue
 import json
+import notes
 from scanners import *
 from scrapers import *
 from results import *
@@ -41,7 +43,25 @@ class ScansHandler(tornado.web.RequestHandler):
         r=Results()
         r.read_all('results')
         self.write({'scans': sorted(r.scans, key=lambda x:x['target'])})
-    
+
+class NotesHandler(tornado.web.RequestHandler):
+    def get(self, shit):
+        args = shit.split('/')
+        if len(args) == 2 and args[0] == 'ip':
+            self.write(notes.notesforhost(args[1]))
+        else:
+            self.write({})
+
+    def post(self, dummy):
+        x = json_decode(self.request.body)
+        for key, val in x.items():
+            notes.savenote(key,val)
+        self.write({})
+
+    def delete(self, args):
+        ip = args.split('/')[0]
+        notes.deletenote(ip)
+        self.write({})
 
 class ResultsHandler(tornado.web.RequestHandler):
     def get(self, shit):
@@ -53,10 +73,11 @@ class ResultsHandler(tornado.web.RequestHandler):
             ip = args[1]
             r = Results()
             r.read_all('results')
+            result = {}
             if ip in r.hosts.keys():
                 self.write({ip: r.hosts[ip]})
             else:
-                self.write({'ip': {}})
+                self.write({})
         elif args[0] == 'port':
             port = args[1]
             r = Results()
@@ -68,6 +89,7 @@ class ResultsHandler(tornado.web.RequestHandler):
             service = self.get_query_argument('service', None)
             vulns = self.get_query_argument('vulns', None)
             screenshots = self.get_query_argument('screenshots', None)
+            notes = self.get_query_argument('notes', None)
             sys.stderr.write('filtering: prefix=%s port=%s service=%s vulns=%s screenshots=%s\n'%(str(prefix), str(port), str(service), str(vulns), str(screenshots)))
             r = Results()
             r.read_all('results')
@@ -90,6 +112,9 @@ class ResultsHandler(tornado.web.RequestHandler):
             if screenshots and screenshots == 'true':
                 filtered = filter_by_screenshots(filtered)
                 sys.stderr.write('count screenshots=%d\n'%(len(filtered.keys())))
+            if notes and notes == 'true':
+                filtered = filter_by_having_notes(filtered)
+                sys.stderr.write('count notes=%d\n'%(len(filtered.keys())))
             sys.stderr.write('count final=%d\n'%(len(filtered.keys())))
             self.write({'ips':list(filtered.keys())})
         elif args[0] == 'all':
@@ -364,6 +389,7 @@ def make_app():
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": "ui/asscan/dist/js/"}),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "ui/asscan/dist/css/"}),
         (r"/results/(.*)", ResultsHandler),
+        (r"/notes/(.*)", NotesHandler),
         (r"/scans/", ScansHandler),
         (r"/api/scans/", ScansHandler),
         (r"/(.*)", tornado.web.StaticFileHandler, {"path": "ui/asscan/dist/",\
