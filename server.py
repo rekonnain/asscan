@@ -175,6 +175,10 @@ class JobsHandler(tornado.web.RequestHandler):
         target = self.get_query_argument("target", None)
         mask = self.get_query_argument("mask", None)
         maxmask = self.get_query_argument('maxmask', None)
+        vncpassword = self.get_query_argument('vncpassword', None)
+        username = self.get_query_argument('username', None)
+        domain = self.get_query_argument('domain', None)
+        password = self.get_query_argument('password', None)
         hostkeys = None
         if ',' in target:
             hostkeys = target.replace(' ','').split(',')

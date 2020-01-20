@@ -114,6 +114,7 @@
           />MS17-010
         </div>
       </div>
+
       <div class="mt-4 flex items-center justify-between">
         <label class="block text-gray-700 w-2/5 text-sm" for="username">target</label>
         <label class="block text-gray-700 w-1/5 text-sm" for="netmask">netmask</label>
@@ -150,6 +151,45 @@
           placeholder="80"
         />
       </div>
+
+      <div class="mt-4 flex items-center justify-between">
+        <label class="block text-gray-700 w-2/5 text-sm" for="vncpassword">VNC password</label>
+        <label class="block text-gray-700 w-1/5 text-sm" for="domain">Domain</label>
+        <label class="block text-gray-700 w-1/5 text-sm" for="username">Username</label>
+        <label class="block text-gray-700 w-1/5 text-sm" for="password">Password</label>
+      </div>
+      <div class="flex items-center justify-between">
+        <input
+          class="shadow appearance-none border rounded w-2/5 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="target"
+          type="text"
+          v-model="values.vncpassword"
+          placeholder="hunter2 :D"
+        />
+        <input
+          class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="netmask"
+          type="text"
+          v-model="values.domain"
+          placeholder="MEGACORP"
+        />
+        <input
+          class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="port"
+          type="text"
+          v-model="values.username"
+          placeholder="Administrator"
+        />
+        <input
+          class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="port"
+          type="text"
+          v-model="values.password"
+          placeholder="makkara"
+        />
+      </div>
+
+
       <div class="mt-8 flex items-center justify-center">
         <input
           type="checkbox"
@@ -203,6 +243,10 @@ export default {
         netmask: "",
         splitmask: "",
         port: "",
+        vncpassword: "",
+        domain: "",
+        username: "",
+        password: "",
         masscan: false,
         nmap: false,
         ffuf: false,
@@ -260,6 +304,19 @@ export default {
       if (this.values.splitmask.length > 0) {
         targetspec += "&maxmask=" + this.values.splitmask;
       }
+      if (this.values.vncpassword.length > 0) {
+        targetspec += "&vncpassword=" + this.values.vncpassword;
+      }
+      if (this.values.domain.length > 0) {
+        targetspec += "&domain=" + this.values.domain;
+      }
+      if (this.values.username.length > 0) {
+        targetspec += "&username=" + this.values.username;
+      }
+      if (this.values.password.length > 0) {
+        targetspec += "&password=" + this.values.password;
+      }
+      
 
       // curl -X POST 'http://localhost:8888/jobs/?prefix=10.20.20.85&type=snmpwalk'
       if (this.values.masscan) {

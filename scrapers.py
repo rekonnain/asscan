@@ -89,12 +89,15 @@ class RdpScreenshot(ScraperJob):
         self.output_filename_pattern = '([0-9.]+)\.png'
     
 class VncScreenshot(ScraperJob):
-    def __init__(self, targets, port='5901', processes=4):
+    def __init__(self, targets, port='5901', processes=4, password = ''):
         super().__init__(processes)
         self.targets = targets
         self.scantype = 'vncscreenshot'
         self.port = port
-        self.commandline = lambda scheme, target, port: "vncdo -t 2.0 -s %s::%s capture output/%s.png "%(target, port, target)
+        pw = ''
+        if len(password) > 0:
+            pw = "-p '%s'"%password
+        self.commandline = lambda scheme, target, port: "vncdo %s -t 2.0-s %s::%s capture output/%s.png "%(pw, target, port, target)
         self.output_filename_pattern = '([0-9.]+)\.png'
         
         
