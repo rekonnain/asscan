@@ -390,6 +390,7 @@ def make_app():
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "ui/asscan/dist/css/"}),
         (r"/results/(.*)", ResultsHandler),
         (r"/notes/(.*)", NotesHandler),
+        (r"/api/notes/(.*)", NotesHandler),
         (r"/scans/", ScansHandler),
         (r"/api/scans/", ScansHandler),
         (r"/(.*)", tornado.web.StaticFileHandler, {"path": "ui/asscan/dist/",\
