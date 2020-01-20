@@ -94,10 +94,7 @@ class VncScreenshot(ScraperJob):
         self.targets = targets
         self.scantype = 'vncscreenshot'
         self.port = port
-        pw = ''
-        if len(password) > 0:
-            pw = "-p '%s'"%password
-        self.commandline = lambda scheme, target, port: "vncdo %s -t 2.0 -s %s::%s capture output/%s.png "%(pw, target, port, target)
+        self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s %s output/%s.png "%(target, port, password, target)
         self.output_filename_pattern = '([0-9.]+)\.png'
         
         
