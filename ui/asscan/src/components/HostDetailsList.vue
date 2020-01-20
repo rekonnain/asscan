@@ -132,7 +132,7 @@ export default {
 
   methods: {
     selectIp(ip) {
-        this.getNotes(ip)
+      this.getNotes(ip)
       axios
         .get("/api/results/ip/" + ip)
         .then(response => this.handleResults(response.data, ip));
@@ -144,6 +144,7 @@ export default {
     },
     createurl: utils.createurl,
     getNotes(ip) {
+      this.note = ''
       axios
       .get("/api/notes/ip/" + ip)
       .then(response => this.handleNotes(response.data, ip));
