@@ -147,6 +147,8 @@ class ResultsHandler(tornado.web.RequestHandler):
         else:
             self.write({"status": "not ok"}) # what
 
+    
+            
 # information on current scan jobs
 class JobsHandler(tornado.web.RequestHandler):
     def get(self, shit):
@@ -167,28 +169,32 @@ class JobsHandler(tornado.web.RequestHandler):
             
 
     # submits a new scan job
-    def post(self, args):
-        typ = self.get_query_argument('type')
-        foundonly = self.get_query_argument('found_only', False) # when set, only scan hosts found with eg. masscan earlier
-        if foundonly == 'false' or foundonly == '0': # how stringly
-            foundonly = False
-        target = self.get_query_argument("target", None)
-        mask = self.get_query_argument("mask", None)
-        maxmask = self.get_query_argument('maxmask', None)
-        vncpassword = self.get_query_argument('vncpassword', '')
-        username = self.get_query_argument('username', None)
-        domain = self.get_query_argument('domain', None)
-        password = self.get_query_argument('password', None)
+    def post(self, dummy = None):
+        jobspec = json_decode(self.request.body)
+        self.write(forkjobs(jobspec))
 
-        hostkeys = None
-        if ',' in target:
-            hostkeys = target.replace(' ','').split(',')
-        
-        if not target or not mask:
-            self.write({'status': 'fuck off',
-                        'reason': 'target or mask missing'})
-            return
+def forkjobs(jobspec):
+    print(json.dumps(jobspec, indent=4, sort_keys=True))
+    scantypes = jobspec['scantypes'] if 'scantypes' in jobspec else []
+    foundonly = jobspec['found_only'] if 'found_only' in jobspec else False
+    if foundonly == 'false' or foundonly == '0': # how stringly
+        foundonly = False
+    target = jobspec['target'] if 'target' in jobspec else None
+    mask = jobspec['mask'] if 'mask' in jobspec else None
+    maxmask = jobspec['maxmask'] if 'maxmask' in jobspec else None
+    vncpassword = jobspec['vncpassword'] if 'vncpassword' in jobspec else ''
+    username = jobspec['username'] if 'username' in jobspec else None
+    domain = jobspec['domain'] if 'domain' in jobspec else None
+    password = jobspec['password'] if 'password' in jobspec else None
+    hostkeys = None
+    if ',' in target:
+        hostkeys = target.replace(' ','').split(',')
 
+    if not target or not mask:
+        return{'status': 'fuck off',
+               'reason': 'target or mask missing'}
+
+    for typ in scantypes:
         if typ == 'masscan':
             targetspec = [target + '/' + mask]
             jobids = []
@@ -208,7 +214,6 @@ class JobsHandler(tornado.web.RequestHandler):
                     job = Masscan(t)
                 forkjob(job, massqueue)
                 jobids.append(job.ident)
-            self.write({'jobs': jobids})
         elif typ == 'nmap':
             if foundonly: # only scan hosts found earlier with masscan
                 r = Results()
@@ -223,7 +228,6 @@ class JobsHandler(tornado.web.RequestHandler):
                     job = Nmap(kl)
                     forkjob(job, nmapqueue)
                     jobids.append(job.ident)
-                self.write({'jobs': jobids})
             else:
                 targetspec = [target + '/' + mask]
                 jobids = []
@@ -235,19 +239,16 @@ class JobsHandler(tornado.web.RequestHandler):
                     job = Nmap(t)
                     forkjob(job, nmapqueue)
                     jobids.append(job.ident)
-                self.write({'jobs': jobids})
         elif typ == 'nmap-udp': # TODO missing the foundonly flag handling!
             udp = True
             targetspec = None
             prefix = self.get_query_argument('prefix', None)
             job = Nmap(targetspec, udp=True)
             forkjob(job, nmapqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'smbvuln': # check if this still works. OTOH ms17-010 has its own checker now
             targetspec = target + '/' + mask
             job = SmbVuln(targetspec)
             forkjob(job, vulnqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'webscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
             port = self.get_query_argument('port', '80')
@@ -263,7 +264,6 @@ class JobsHandler(tornado.web.RequestHandler):
                 hostkeys = [target]
             job = WebScreenshot(list(hosts.keys()), scheme, port)
             forkjob(job, scraperqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'rdpscreenshot':
             port = self.get_query_argument('port', '3389') # default port only
             r = Results()
@@ -278,7 +278,6 @@ class JobsHandler(tornado.web.RequestHandler):
             print('hostkeys %s'%str(hostkeys))
             job = RdpScreenshot(hostkeys)
             forkjob(job, scraperqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'vncscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
             port = self.get_query_argument('port', '5901') # UI should set this
@@ -294,7 +293,6 @@ class JobsHandler(tornado.web.RequestHandler):
             print('hostkeys %s'%str(hostkeys))
             job = VncScreenshot(hostkeys, port=port, password=vncpassword)
             forkjob(job, scraperqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'enum4linux':
             # Fetch results for target subnet, only screenshot those with open ports
             r = Results()
@@ -310,7 +308,6 @@ class JobsHandler(tornado.web.RequestHandler):
                 hostkeys = [target]
             job = Enum4Linux(hostkeys)
             forkjob(job, scraperqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'snmpwalk':
             # Fetch results for target subnet, only screenshot those with open ports
             prefix = self.get_query_argument('prefix', None)
@@ -323,10 +320,9 @@ class JobsHandler(tornado.web.RequestHandler):
                 hostkeys = [target]
             job = Snmpwalk(hostkeys)
             forkjob(job, scraperqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'ffuf':
             # Fetch results for target subnet, only screenshot those with open ports
-            port = self.get_query_argument('port', '80')
+            port = jobspec['port'] if 'port' in jobspec else '80'
             r = Results()
             r.read_all('results')
             hosts = r.hosts
@@ -336,9 +332,8 @@ class JobsHandler(tornado.web.RequestHandler):
                 hosts = filter_by_port(hosts, port)
                 sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
             hostkeys = list(hosts.keys())
-            job = Ffuf(hostkeys)
+            job = Ffuf(hostkeys, port=port)
             forkjob(job, scraperqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'bluekeep':
             # Fetch results for target subnet, only screenshot those with open ports
             port = '3389'
@@ -358,8 +353,6 @@ class JobsHandler(tornado.web.RequestHandler):
                 job = Bluekeep(kl)
                 forkjob(job, scraperqueue)
                 jobids.append(job.ident)
-            self.write({'jobs': jobids})
-            self.write({'jobid': job.ident})
         elif typ == 'ms17_010':
             # Fetch results for target subnet, only screenshot those with open ports
             port = '445'
@@ -374,15 +367,14 @@ class JobsHandler(tornado.web.RequestHandler):
             hostkeys = list(hosts.keys())
             job = Ms17_010(hostkeys)
             forkjob(job, scraperqueue)
-            self.write({'jobid': job.ident})
         elif typ == 'sleep':
             job = SleepJob()
             forkjob(job, nmapqueue)
         else:
-            self.write({'error': 'unknown job type'})
-            
+            pass
+    return {'status': 'ok'} # TODO, return some info of queued jobs
 
-
+        
 def make_app():
     return tornado.web.Application([
         (r"/jobs/(.*)", JobsHandler),

@@ -116,9 +116,15 @@
       </div>
 
       <div class="mt-4 flex items-center justify-between">
-        <label class="block text-gray-700 w-2/5 text-sm" for="username">target</label>
-        <label class="block text-gray-700 w-1/5 text-sm" for="netmask">netmask</label>
-        <label class="block text-gray-700 w-1/5 text-sm" for="port">job max mask</label>
+        <label class="block text-gray-700 w-2/5 text-sm" for="username"
+          >target</label
+        >
+        <label class="block text-gray-700 w-1/5 text-sm" for="netmask"
+          >netmask</label
+        >
+        <label class="block text-gray-700 w-1/5 text-sm" for="port"
+          >job max mask</label
+        >
         <label class="block text-gray-700 w-1/5 text-sm" for="port">port</label>
       </div>
       <div class="flex items-center justify-between">
@@ -153,10 +159,18 @@
       </div>
 
       <div class="mt-4 flex items-center justify-between">
-        <label class="block text-gray-700 w-2/5 text-sm" for="vncpassword">VNC password</label>
-        <label class="block text-gray-700 w-1/5 text-sm" for="domain">Domain</label>
-        <label class="block text-gray-700 w-1/5 text-sm" for="username">Username</label>
-        <label class="block text-gray-700 w-1/5 text-sm" for="password">Password</label>
+        <label class="block text-gray-700 w-2/5 text-sm" for="vncpassword"
+          >VNC password</label
+        >
+        <label class="block text-gray-700 w-1/5 text-sm" for="domain"
+          >Domain</label
+        >
+        <label class="block text-gray-700 w-1/5 text-sm" for="username"
+          >Username</label
+        >
+        <label class="block text-gray-700 w-1/5 text-sm" for="password"
+          >Password</label
+        >
       </div>
       <div class="flex items-center justify-between">
         <input
@@ -189,7 +203,6 @@
         />
       </div>
 
-
       <div class="mt-8 flex items-center justify-center">
         <input
           type="checkbox"
@@ -205,15 +218,21 @@
           class="bg-blue-500 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           type="button"
           @click="submit()"
-        >Submit</button>
+        >
+          Submit
+        </button>
       </div>
     </form>
     <div v-if="scanlist.length > 0">
       <p>Nmap & masscan done so far:</p>
       <table class="table-auto">
-        <tr class="odd:bg-green-200 even:bg-teal-200" v-for="scan in scanlist" :key="scan">
-          <td class="p-2">{{scan['scantype']}}</td>
-          <td class="p-2">{{scan['target']}}</td>
+        <tr
+          class="odd:bg-green-200 even:bg-teal-200"
+          v-for="scan in scanlist"
+          :key="scan"
+        >
+          <td class="p-2">{{ scan["scantype"] }}</td>
+          <td class="p-2">{{ scan["target"] }}</td>
         </tr>
       </table>
     </div>
@@ -280,85 +299,90 @@ export default {
       console.log(this.scanlist);
     },
 
-    requestscan(scantype, targetspec, onlyfound) {
-      let url = "/api/jobs/?type=" + scantype + targetspec;
-      if (onlyfound) {
-        url += "&found_only=true";
-      } else {
-        url += "&found_only=false";
-      }
-      this.post(url);
+    requestscan(scandescription) {
+      let url = "/api/jobs/";
+      console.log('scan description:')
+      console.log(scandescription)
+      axios.post(url, scandescription);
     },
     submit() {
       if (this.values.target.length == 0) {
         alert("target field is empty, idiot");
         return;
       }
+      let payload = {};
       const netmask =
         this.values.netmask.length > 0 ? this.values.netmask : "32";
 
-      let targetspec = "&target=" + this.values.target + "&mask=" + netmask;
+      payload.target = this.values.target;
+      payload.mask = netmask;
       if (this.values.port.length > 0) {
-        targetspec += "&port=" + this.values.port;
+        payload.port = this.values.port;
       }
       if (this.values.splitmask.length > 0) {
-        targetspec += "&maxmask=" + this.values.splitmask;
+        payload.maxmask = this.values.splitmask;
       }
       if (this.values.vncpassword.length > 0) {
-        targetspec += "&vncpassword=" + this.values.vncpassword;
+        payload.vncpassword = this.values.vncpassword;
       }
       if (this.values.domain.length > 0) {
-        targetspec += "&domain=" + this.values.domain;
+        payload.domain = this.values.domain;
       }
       if (this.values.username.length > 0) {
-        targetspec += "&username=" + this.values.username;
+        payload.username = this.values.username;
       }
       if (this.values.password.length > 0) {
-        targetspec += "&password=" + this.values.password;
+        payload.password = this.values.password;
       }
-      
+
+      let scantypes = [];
 
       // curl -X POST 'http://localhost:8888/jobs/?prefix=10.20.20.85&type=snmpwalk'
       if (this.values.masscan) {
-        this.requestscan("masscan", targetspec, false);
+        scantypes.push("masscan");
         this.values.masscan = false;
       }
       if (this.values.nmap) {
-        this.requestscan("nmap", targetspec, this.values.onlyfound);
+        scantypes.push("nmap");
         this.values.nmap = false;
       }
       if (this.values.web) {
-        this.requestscan("webscreenshot", targetspec, this.values.onlyfound);
+        scantypes.push("webscreenshot");
         this.values.web = false;
       }
       if (this.values.rdp) {
-        this.requestscan("rdpscreenshot", targetspec, this.values.onlyfound);
+        scantypes.push("rdpscreenshot");
         this.values.rdp = false;
       }
       if (this.values.vnc) {
-        this.requestscan("vncscreenshot", targetspec, this.values.onlyfound);
+        scantypes.push("vncscreenshot");
         this.values.vnc = false;
       }
       if (this.values.snmp) {
-        this.requestscan("snmpwalk", targetspec, this.values.onlyfound);
+        scantypes.push("snmpwalk");
         this.values.snmp = false;
       }
       if (this.values.enum4linux) {
-        this.requestscan("enum4linux", targetspec, this.values.onlyfound);
+        scantypes.push("enum4linux");
         this.values.enum4linux = false;
       }
       if (this.values.ffuf) {
-        this.requestscan("ffuf", targetspec, this.values.onlyfound);
+        scantypes.push("ffuf");
         this.values.ffuf = false;
       }
       if (this.values.bluekeep) {
-        this.requestscan("bluekeep", targetspec, this.values.onlyfound);
+        scantypes.push("bluekeep");
         this.values.bluekeep = false;
       }
       if (this.values.ms17_010) {
-        this.requestscan("ms17_010", targetspec, this.values.onlyfound);
+        scantypes.push("ms17_010");
         this.values.ms17_010 = false;
       }
+
+      payload.scantypes = scantypes;
+      payload.onlyfound = this.values.onlyfound
+
+      this.requestscan(payload)
     }
   }
 };

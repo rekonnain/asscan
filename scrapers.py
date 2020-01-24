@@ -147,17 +147,19 @@ class Enum4Linux(ScraperJob):
 
 
 class Ffuf(ScraperJob):
-    def __init__(self, targets, processes=4):
+    def __init__(self, targets, processes=4, port='80'):
         super().__init__()
         self.targets = targets
         self.path = 'results'
         self.scantype='ffuf'
         self.targets = targets
+        self.port = port
         self.output_filename_pattern = 'out\.ffuf\.([0-9.]+)'
     
-    def scan(self, port='80', scheme='http'):
-        self.port = port
+    def scan(self, scheme='http'):
         self.scheme = scheme
+        if self.port == '443':
+            self.scheme = 'https'
         os.chdir(self.path)
         try:
             os.mkdir(self.ident)
@@ -171,8 +173,8 @@ class Ffuf(ScraperJob):
         def enumtask(target):
             targetspec = scheme + '://'
             targetspec += target
-            if port:
-                targetspec += ':%s'%port
+            if self.port:
+                targetspec += ':%s'%self.port
             targetspec += '/FUZZ'
             targetqueue.put(target)
 
