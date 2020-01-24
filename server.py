@@ -18,9 +18,13 @@ re_uuid = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}
 # queues for tasks of different kinds. The maxsize parameter determines
 # how many tasks can be active in parallel at any given time
 massqueue = Queue(maxsize = 1)
+masscount = 0
 nmapqueue = Queue(maxsize = 4)
+nmapcount = 0
 vulnqueue = Queue(maxsize = 16)
+vulncount = 0
 scraperqueue = Queue(maxsize = 8)
+scrapercount = 0
 
 alljobs = {}
 
@@ -32,6 +36,10 @@ def forkjob(job, queue):
         job.scan()
         del alljobs[job.ident]
         x=queue.get()
+        sys.stderr.write('Job %s done\n'%job.ident)
+        if job.posthook:
+            sys.stderr.write('Executing post hook for job %s\n'%job.ident)
+            job.posthook()
         sys.stderr.write("Removed %s from queue\n"%x)
         sys.stderr.write("Queue length %d\n"%queue.qsize())
     p = Process(target = task)
@@ -190,6 +198,26 @@ def forkjobs(jobspec):
     if ',' in target:
         hostkeys = target.replace(' ','').split(',')
 
+    massjobs = []
+        
+    # When submitting multiple job types in the same request and masscan is one of
+    # the scan types, we first want to perform the masscan and only after that, the
+    # other scan types, because we implictly perform other scans only against already
+    # discovered hosts.
+    # As the "already discovered" is handled here, we need to postpone finding out
+    # which hosts are discovered until the masscan is done...
+    posthook = None
+
+    if 'masscan' in scantypes and len(scantypes) > 1:
+        othertypes = scantypes[:]
+        othertypes.remove('masscan')
+        otherjobspec = jobspec.copy()
+        otherjobspec['scantypes'] = othertypes
+        otherjobspec['found_only'] = 'true'
+        scantypes = ['masscan']
+        posthook = lambda: forkjobs(otherjobspec)
+
+    
     if not target or not mask:
         return{'status': 'fuck off',
                'reason': 'target or mask missing'}
@@ -198,7 +226,7 @@ def forkjobs(jobspec):
         if typ == 'masscan':
             targetspec = [target + '/' + mask]
             jobids = []
-            port = self.get_query_argument('port', None)
+            port = jobspec['port'] if 'port' in jobspec else None
 
             # split a netmask N scan into smaller scans of mask M
             # 10.0.0.0/8 with submask /9 --> two scans
@@ -212,7 +240,8 @@ def forkjobs(jobspec):
                     job = Masscan(t, ports = port.replace(' ',''))
                 else: # default port list, see the masscan class
                     job = Masscan(t)
-                forkjob(job, massqueue)
+                massjobs.append(job)
+                #forkjob(job, massqueue)
                 jobids.append(job.ident)
         elif typ == 'nmap':
             if foundonly: # only scan hosts found earlier with masscan
@@ -242,7 +271,7 @@ def forkjobs(jobspec):
         elif typ == 'nmap-udp': # TODO missing the foundonly flag handling!
             udp = True
             targetspec = None
-            prefix = self.get_query_argument('prefix', None)
+            prefix = jobspec['prefix'] if 'prefix' in jobspec else None
             job = Nmap(targetspec, udp=True)
             forkjob(job, nmapqueue)
         elif typ == 'smbvuln': # check if this still works. OTOH ms17-010 has its own checker now
@@ -251,8 +280,8 @@ def forkjobs(jobspec):
             forkjob(job, vulnqueue)
         elif typ == 'webscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
-            port = self.get_query_argument('port', '80')
-            scheme = self.get_query_argument('scheme', 'http')
+            port = jobspec['port'] if 'port' in jobspec else '80'
+            scheme = jobspec['scheme'] if 'scheme' in jobspec else 'http'
             r = Results()
             r.read_all('results')
             hosts = r.hosts
@@ -265,7 +294,7 @@ def forkjobs(jobspec):
             job = WebScreenshot(list(hosts.keys()), scheme, port)
             forkjob(job, scraperqueue)
         elif typ == 'rdpscreenshot':
-            port = self.get_query_argument('port', '3389') # default port only
+            port = jobspec['port'] if 'port' in jobspec else '3389'
             r = Results()
             r.read_all('results')
             hosts = r.hosts
@@ -280,7 +309,7 @@ def forkjobs(jobspec):
             forkjob(job, scraperqueue)
         elif typ == 'vncscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
-            port = self.get_query_argument('port', '5901') # UI should set this
+            port = jobspec['port'] if 'port' in jobspec else '5901'
             r = Results()
             r.read_all('results')
             hosts = r.hosts
@@ -310,7 +339,7 @@ def forkjobs(jobspec):
             forkjob(job, scraperqueue)
         elif typ == 'snmpwalk':
             # Fetch results for target subnet, only screenshot those with open ports
-            prefix = self.get_query_argument('prefix', None)
+            prefix = jobspec['prefix'] if 'prefix' in jobspec else None
             r = Results()
             r.read_all('results')
             hosts = r.hosts
@@ -372,6 +401,11 @@ def forkjobs(jobspec):
             forkjob(job, nmapqueue)
         else:
             pass
+
+    if len(massjobs) > 0:
+        massjobs[-1].posthook = posthook
+        for job in massjobs:
+            forkjob(job, massqueue)
     return {'status': 'ok'} # TODO, return some info of queued jobs
 
         
