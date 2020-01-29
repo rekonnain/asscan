@@ -121,7 +121,12 @@ class JobsHandler(tornado.web.RequestHandler):
         else:
             self.write(jd.forkjobs(jobspec))
 
-
+class AgentsHandler(tornado.web.RequestHandler):
+    def get(self):
+        if state.is_server:
+            self.write(state.mclient.get_clients())
+        else:
+            self.write({})
         
 def make_app():
     return tornado.web.Application([
@@ -136,6 +141,8 @@ def make_app():
         (r"/results/(.*)", ResultsHandler),
         (r"/notes/(.*)", NotesHandler),
         (r"/api/notes/(.*)", NotesHandler),
+        (r"/agents/", AgentsHandler),
+        (r"/api/agents/", AgentsHandler),
         (r"/scans/", ScansHandler),
         (r"/api/scans/", ScansHandler),
         (r"/(.*)", tornado.web.StaticFileHandler, {"path": "ui/asscan/dist/",\
@@ -147,8 +154,12 @@ def main():
     
     # mqtt
     if sys.argv[1] == 'agent':
-        state.mclient = m.agent()
-        serverport = 8889
+        if len(sys.argv) == 3:
+            state.mclient = m.agent(sys.argv[2])
+            serverport = 8889
+        else:
+            print("usage: %s agent agent-id"%sys.argv[0])
+            sys.exit(0)
     elif sys.argv[1] == 'server':
         state.mclient = m.server()
         state.is_server = True

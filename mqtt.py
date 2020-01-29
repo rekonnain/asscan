@@ -72,12 +72,13 @@ class agent:
     def startjob(self, jobdesc):
         jd.forkjobs(jobdesc)
             
-    def __init__(self):
+    def __init__(self, clientid):
         self.client = mqtt.Client()
         self.client.on_connect = agent_on_connect
         self.client.on_message = lambda c, u, m: self.on_message(c, u, m)
         self.last_presence_at = 0.0 # when did we last announce we are online
-        self.clientid = socket.gethostbyname(socket.gethostname()) # TODO maybe user configurable
+        self.ip = socket.gethostbyname(socket.gethostname()) # TODO maybe user configurable
+        self.clientid = clientid
 
     def connect(self):
         print("Connecting")
@@ -89,6 +90,7 @@ class agent:
         if time.time() - self.last_presence_at > 5.0:
             payload = { 'time': time.time(),
                         'clientid': self.clientid,
+                        'ip': self.ip,
                         'type': 'announce-presence' }
             self.client.publish(presence_channel, json.dumps(payload))
             self.last_presence_at = time.time()
@@ -103,16 +105,25 @@ class server:
         if j['type'] == 'announce-presence':
             clientid = j['clientid']
             timestamp = j['time']
+            ip = j['ip']
             #print(timestamp)
             if not clientid in self.connected_clients:
                 print("New agent: %s"%clientid)
-            self.connected_clients[clientid] = timestamp
+            self.connected_clients[clientid] = {'timestamp': timestamp,
+                                                'ip': ip,
+                                                'clientid': clientid}
             
     def prune_clients(self):
         for key in list(self.connected_clients.keys())[:]:
-            if time.time() - self.connected_clients[key] > 10.0:
+            if time.time() - self.connected_clients[key]['timestamp'] > 10.0:
                 print("Removing stale agent %s"%key)
                 del self.connected_clients[key]
+
+    def get_clients(self):
+        clients = list(self.connected_clients.values())
+        for c in clients:
+            del(c['timestamp'])
+        return {'clients': clients}
             
     def startjob(self, jobdesc):
         jobdesc['type'] = 'start-job-request'
