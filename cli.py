@@ -9,9 +9,9 @@ class Cli(cmd.Cmd):
     intro = 'Welcome to the ASSCAN admin shell. Type help or ? to list commands.\n'
     prompt = 'ASSCAN> '
 
-    def do_list_clients(self, arg):
+    def do_list_agents(self, arg):
         'Lists connected clients'
-        print('foo')
+        print(c.get_clients())
 
     def do_get_results_by_ip(self, arg):
         'Gets results for IP'
