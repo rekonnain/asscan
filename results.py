@@ -130,17 +130,6 @@ def get_results(args, filters={}):
         r = Results()
         r.read_all('results')
         return {'ips':sorted(list(r.hosts.keys()))}
-    elif re_uuid.match(args[0]): # some scans save files, this returns them
-        filepath = join('results', *args)
-        if filepath.endswith('.png'):
-            self.set_header('content-type', 'image/png')
-            return open(filepath,'rb').read()
-        if filepath.endswith('.jpg'):
-            self.set_header('content-type', 'image/jpg')
-            return open(filepath,'rb').read()
-        else:
-            self.set_header('content-type', 'text/plain')
-            return open(filepath,'rb').read()
     else:
         return {"status": "not ok"} # what
 
