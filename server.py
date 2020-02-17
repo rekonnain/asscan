@@ -51,53 +51,14 @@ class ResultsHandler(tornado.web.RequestHandler):
         # Returns results from all scans
         # The web UI only uses the /filter? api
         args = shit.split('/')
-
-        if args[0] == 'ip': # single result by ip, /results/ip/192.168.0.1
-            ip = args[1]
-            self.write(jd.get_results_for_ip(ip))
-        elif args[0] == 'port':
-            port = args[1]
-            self.write(jd.get_results_by_port(port))
-        elif args[0] == 'filter':
-            filters = {}
-            filters['prefix'] = self.get_query_argument('prefix', None)
-            filters['port'] = self.get_query_argument('port', None)
-            filters['service'] = self.get_query_argument('service', None)
-            filters['vulns'] = self.get_query_argument('vulns', None)
-            filters['screenshots'] = self.get_query_argument('screenshots', None)
-            filters['notes'] = self.get_query_argument('notes', None)
-            #sys.stderr.write('filtering: prefix=%s port=%s service=%s vulns=%s screenshots=%s\n'%(str(prefix), str(port), str(service), str(vulns), str(screenshots)))
-            self.write(jd.get_filtered_results(filters))
-        elif args[0] == 'all':
-            r = Results()
-            r.read_all('results')
-            self.write(r.hosts)
-        elif args[0] == 'networks': # i don't think this is used currently
-            r = Results()
-            r.read_all('results')
-            counts = collections.defaultdict(int)
-            for key in r.hosts.keys():
-                k = '.'.join(key.split('.')[:2])
-                counts[k] += 1
-            self.write(dict(counts))
-        elif args[0] == 'ips':
-            r = Results()
-            r.read_all('results')
-            self.write({'ips':sorted(list(r.hosts.keys()))})
-        elif re_uuid.match(args[0]): # some scans save files, this returns them
-            filepath = join('results', *args)
-            if filepath.endswith('.png'):
-                self.set_header('content-type', 'image/png')
-                self.write(open(filepath,'rb').read())
-            if filepath.endswith('.jpg'):
-                self.set_header('content-type', 'image/jpg')
-                self.write(open(filepath,'rb').read())
-            else:
-                self.set_header('content-type', 'text/plain')
-                self.write(open(filepath,'rb').read())
-        else:
-            self.write({"status": "not ok"}) # what
-
+        filters = {}
+        filters['prefix'] = self.get_query_argument('prefix', None)
+        filters['port'] = self.get_query_argument('port', None)
+        filters['service'] = self.get_query_argument('service', None)
+        filters['vulns'] = self.get_query_argument('vulns', None)
+        filters['screenshots'] = self.get_query_argument('screenshots', None)
+        filters['notes'] = self.get_query_argument('notes', None)
+        self.write(get_results(args, filters))
     
             
 # information on current scan jobs

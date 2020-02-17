@@ -5,9 +5,11 @@ import json
 import jobdispatch as jd
 import time
 import socket
+from results import *
 
 presence_channel = 'asscan/presence'
-jobs_channel = 'asscan/job'
+agent_channel = 'asscan/agent'
+results_channel = 'asscan/results'
 
 server_addr = 'mqtt1.local.lan'
 identity = 'foo-1'
@@ -48,10 +50,16 @@ Therefore, all periodic tasks can be implemented inside the tick() method.
 
 def agent_on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    client.subscribe(jobs_channel)
+    client.subscribe(agent_channel)
 
 def server_on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
+    client.subscribe(presence_channel)
+    client.subscribe(results_channel)
+
+def client_on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+    client.subscribe(results_channel)
     client.subscribe(presence_channel)
 
     
@@ -66,6 +74,21 @@ class agent:
             response = { 'type': 'presence-response',
                          'clientid': identity }
             client.publish(presence_channel, json.dumps(response))
+        elif mtype == 'results-request':
+            print("returning results")
+            args = j['args']
+            filters = j['filters'] if 'filters' in j else {}
+            print('args: %s'%str(args))
+            print('filters: %s'%str(filters))
+            r = Results()
+            print('vittu')
+            r.read_all('results')
+            x = get_results(args, filters)
+            print("results request")
+            response = { 'type': 'results-response',
+                         'clientid': identity,
+                         'results': x }
+            client.publish(results_channel, json.dumps(response))
         elif mtype == 'start-job-request':
             self.startjob(j)
 
@@ -104,7 +127,7 @@ class server:
         #print(json.dumps(j, sort_keys = True, indent = 4))
         if j['type'] == 'announce-presence':
             clientid = j['clientid']
-            timestamp = j['time']
+            timestamp = time.time()
             ip = j['ip']
             #print(timestamp)
             if not clientid in self.connected_clients:
@@ -120,14 +143,11 @@ class server:
                 del self.connected_clients[key]
 
     def get_clients(self):
-        clients = list(self.connected_clients.values())
-        for c in clients:
-            del(c['timestamp'])
-        return {'clients': clients}
+        return self.connected_clients
             
     def startjob(self, jobdesc):
         jobdesc['type'] = 'start-job-request'
-        self.client.publish(jobs_channel, json.dumps(jobdesc))
+        self.client.publish(agent_channel, json.dumps(jobdesc))
             
     def __init__(self):
         self.client = mqtt.Client()
@@ -142,10 +162,74 @@ class server:
         #self.client.loop_forever()
 
     def tick(self):
-        self.prune_clients()
+        try:
+            self.prune_clients()
+        except:
+            print(str(self.connected_clients))
         self.client.loop(timeout=1.0)
         #pass
+
+class client:
+    def on_message(self, client, userdata, msg):
+        p = msg.payload.decode('utf-8')
+        j = json.loads(msg.payload)
+        #print(json.dumps(j, sort_keys = True, indent = 4))
+        if j['type'] == 'announce-presence':
+            clientid = j['clientid']
+            timestamp = time.time()
+            ip = j['ip']
+            #print(timestamp)
+            self.connected_clients[clientid] = {'timestamp': timestamp,
+                                                'ip': ip,
+                                                'clientid': clientid}
+        elif j['type'] == 'results-response':
+            print(json.dumps(j, indent = 4, sort_keys = True))
+            
+    def prune_clients(self):
+        for key in list(self.connected_clients.keys())[:]:
+            if time.time() - self.connected_clients[key]['timestamp'] > 10.0:
+                del self.connected_clients[key]
+
+    def get_clients(self):
+        return self.connected_clients
+
+    def result_by_type(self, typ, arg):
+        p = { 'args': [typ, arg],
+              'filters': {},
+              'type': 'results-request'}
+        self.client.publish(agent_channel, json.dumps(p))
+
+    def all_results(self):
+        p = { 'args': ['all'],
+              'filters': {},
+              'type': 'results-request'}
+        self.client.publish(agent_channel, json.dumps(p))
     
+    def startjob(self, jobdesc):
+        jobdesc['type'] = 'start-job-request'
+        self.client.publish(agent_channel, json.dumps(jobdesc))
+            
+    def __init__(self):
+        self.client = mqtt.Client()
+        self.client.on_connect = server_on_connect
+        self.client.on_message = lambda c, u, m: self.on_message(c, u, m)
+        self.connected_clients = {}
+
+    def connect(self):
+        print("Connecting")
+        #print(self.client.on_connect)
+        self.client.connect(server_addr, 1883, 60)
+        #self.client.loop_forever()
+
+    def tick(self):
+        try:
+            self.prune_clients()
+        except:
+            print(str(self.connected_clients))
+        self.client.loop(timeout=1.0)
+        #pass
+
+        
 
 if __name__=='__main__':
     a = agent()

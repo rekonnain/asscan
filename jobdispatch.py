@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+from results import *
 from multiprocessing import Process, Queue
 import json
 import notes
 from scanners import *
 from scrapers import *
-from results import *
 import re
 from os.path import join
 import collections
@@ -49,78 +49,6 @@ def get_scans():
     r.read_all('results')
     return {'scans': sorted(r.scans, key=lambda x:x['target'])}
 
-def get_results_for_ip(ip):
-    r = Results()
-    r.read_all('results')
-    result = {}
-    if ip in r.hosts.keys():
-        return {ip: r.hosts[ip]}
-    else:
-        return {}
-
-def get_results_by_port(port):
-    r = Results()
-    r.read_all()
-    return r.by_port(port)
-
-def get_filtered_results(filters):
-    prefix = filters['prefix']
-    port = filters['port']
-    service = filters['service']
-    vulns = filters['vulns']
-    screenshots = filters['screenshots']
-    notes = filters['notes']
-    r = Results()
-    r.read_all('results')
-    filtered = r.hosts
-    sys.stderr.write('count all=%d\n'%(len(filtered.keys())))
-    if prefix and len(prefix) > 0:
-        if not prefix[-1] == '.':
-            prefix += '.'
-        filtered = filter_by_prefix(filtered, prefix)
-        sys.stderr.write('count prefix=%d\n'%(len(filtered.keys())))
-    if port and len(port) > 0:
-        filtered = filter_by_port(filtered, port)
-        sys.stderr.write('count port=%d\n'%(len(filtered.keys())))
-    if service and len(service) > 0:
-        filtered = filter_by_service(filtered, service)
-        sys.stderr.write('count service=%d\n'%(len(filtered.keys())))
-    if vulns and vulns == 'true':
-        filtered = filter_by_vulns(filtered)
-        sys.stderr.write('count vulns=%d\n'%(len(filtered.keys())))
-    if screenshots and screenshots == 'true':
-        filtered = filter_by_screenshots(filtered)
-        sys.stderr.write('count screenshots=%d\n'%(len(filtered.keys())))
-    if notes and notes == 'true':
-        filtered = filter_by_having_notes(filtered)
-        sys.stderr.write('count notes=%d\n'%(len(filtered.keys())))
-    sys.stderr.write('count final=%d\n'%(len(filtered.keys())))
-    return {'ips':list(filtered.keys())}
-
-def get_all_results():
-    r = Results()
-    r.read_all('results')
-    return r.hosts
-
-def list_ips():
-    r = Results()
-    r.read_all('results')
-    return {'ips':sorted(list(r.hosts.keys()))}
-
-def get_attachment(pathcomponents):
-    if re_uuid.match(pathcomponents[0]): # some scans save files, this returns them
-        filepath = join('results', *pathcomponents)
-        if filepath.endswith('.png'):
-            self.set_header('content-type', 'image/png')
-            return open(filepath,'rb').read()
-        if filepath.endswith('.jpg'):
-            self.set_header('content-type', 'image/jpg')
-            return open(filepath,'rb').read()
-        else:
-            self.set_header('content-type', 'text/plain')
-            return open(filepath,'rb').read()
-    else:
-        return {"status": "not ok"} # what
     
     
 
