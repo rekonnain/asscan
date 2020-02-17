@@ -9,6 +9,11 @@ import notes
 import ipaddress
 import os
 import jobdispatch as jd
+import re
+
+
+re_uuid = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z', re.I)
+
 
 # functions to filter a results dict by criteria
 def filter_by_port(hosts, port):

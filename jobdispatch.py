@@ -6,11 +6,9 @@ import json
 import notes
 from scanners import *
 from scrapers import *
-import re
 from os.path import join
 import collections
 import ipaddress
-re_uuid = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z', re.I)
 
 
 # queues for tasks of different kinds. The maxsize parameter determines
