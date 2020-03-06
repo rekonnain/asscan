@@ -79,13 +79,13 @@ class ScraperJob(Job):
 
 # simple enough job to be handled by the superclass
 class RdpScreenshot(ScraperJob):
-    def __init__(self, targets, processes=4):
+    def __init__(self, targets, processes=4, domain='', user='', password=''):
         super().__init__(processes)
         self.targets = targets
-        d("rdpscreenshot targets %s"%str(self.targets))
+        d("rdpscreenshot u=%s d=%s p=%s targets %s"%(user,domain,password,str(self.targets)))
         self.scantype='rdpscreenshot'
         # run the rdp-screenshotter script with an offscreen window
-        self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s "%target
+        self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
         self.output_filename_pattern = '([0-9.]+)\.png'
     
 class VncScreenshot(ScraperJob):
@@ -133,15 +133,15 @@ class WebScreenshot(ScraperJob):
 
             
 class Enum4Linux(ScraperJob):
-    def __init__(self, targets, processes=4):
+    def __init__(self, targets, processes=4, domain='', user='', password=''):
         super().__init__(targets)
         self.path = 'results'
         self.scantype='enum4linux'
         self.targets = targets
         self.port = '445'
         self.commandline = lambda scheme, target, port:\
-            "enum4linux %s 2>output/err.%s | tee output/out.enum.%s"%\
-            (target, target, target)
+            "enum4linux -u '%s\\%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
+            (domain,user,password, target, target, target)
         self.output_filename_pattern = 'out\.enum\.([0-9.]+)'
 
 

@@ -124,7 +124,7 @@ class ResultsHandler(tornado.web.RequestHandler):
                 filtered = filter_by_having_notes(filtered)
                 sys.stderr.write('count notes=%d\n'%(len(filtered.keys())))
             sys.stderr.write('count final=%d\n'%(len(filtered.keys())))
-            self.write({'ips':list(filtered.keys())})
+            self.write({'ips':sorted_addresses(filtered.keys())})
         elif args[0] == 'all':
             r = Results()
             r.read_all('results')
@@ -191,9 +191,10 @@ def forkjobs(jobspec):
     mask = jobspec['mask'] if 'mask' in jobspec else None
     maxmask = jobspec['maxmask'] if 'maxmask' in jobspec else None
     vncpassword = jobspec['vncpassword'] if 'vncpassword' in jobspec else ''
-    username = jobspec['username'] if 'username' in jobspec else None
+    user = jobspec['username'] if 'username' in jobspec else None
     domain = jobspec['domain'] if 'domain' in jobspec else None
     password = jobspec['password'] if 'password' in jobspec else None
+    print('password: %s'%password)
     hostkeys = None
     if ',' in target:
         hostkeys = target.replace(' ','').split(',')
@@ -305,7 +306,7 @@ def forkjobs(jobspec):
             if mask == '32':
                 hostkeys = [target]
             print('hostkeys %s'%str(hostkeys))
-            job = RdpScreenshot(hostkeys)
+            job = RdpScreenshot(hostkeys, domain=domain, user=user, password=password)
             forkjob(job, scraperqueue)
         elif typ == 'vncscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
@@ -335,7 +336,7 @@ def forkjobs(jobspec):
             hostkeys = list(hosts.keys())
             if mask == '32':
                 hostkeys = [target]
-            job = Enum4Linux(hostkeys)
+            job = Enum4Linux(hostkeys, domain=domain, user=user, password=password)
             forkjob(job, scraperqueue)
         elif typ == 'snmpwalk':
             # Fetch results for target subnet, only screenshot those with open ports

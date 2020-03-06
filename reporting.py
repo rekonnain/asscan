@@ -7,10 +7,10 @@ def report(dir):
     r = Results()
     r.read_all(dir)
     print("Hosts vulnerable to Bluekeep:")
-    for key in filter_by_bluekeep(r.hosts):
+    for key in sorted_addresses(filter_by_bluekeep(r.hosts).keys()):
         print('  %s'%key)
     print('\nHosts vulnerable to MS17-010:')
-    for key in filter_by_ms17010(r.hosts):
+    for key in sorted_addresses(filter_by_ms17010(r.hosts).keys()):
         print('  %s'%key)
 
 

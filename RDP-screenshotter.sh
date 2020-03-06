@@ -27,6 +27,9 @@ output="output"
 timeout=3
 timeoutStep=2
 host=$1
+domain=$2
+user=$3
+password=$4
 blue="\e[34m[*]\e[0m"
 red="\e[31m[*]\e[0m"
 green="\e[32m[*]\e[0m"
@@ -70,7 +73,7 @@ function ocr {
 # Launch rdesktop in the background
 echo -e "${blue} Initiating funny rdesktop connection to ${host}"
 #rdesktop -u "" -a 16 $host &
-../../autosslrdp.exp $host &
+../../autosslrdp.exp $host $domain $user $password &
 pid=$!
 
 # Get window id

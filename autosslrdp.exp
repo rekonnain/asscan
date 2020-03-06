@@ -11,10 +11,15 @@ if {$force_conservative} {
 }
 
 set host [lindex $argv 0]
+set domain [lindex $argv 1]
+set user [lindex $argv 2]
+set password [lindex $argv 3]
 
 set timeout 10
-spawn rdesktop -u {} $host
+spawn xfreerdp  /u:$user@$domain /p:$password /v:$host
 match_max 100000
-expect "Do you trust this certificate (yes/no)? "
+expect "Do you trust the above certificate? (Y/T/N) "
 send -- "yes\r"
+expect "*\n"
+sleep 4
 expect eof
