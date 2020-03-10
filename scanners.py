@@ -197,7 +197,7 @@ class Nmap(ScanJob):
     def scan(self):
         sys.stderr.write("Starting nmap on %s, jobid %s\n"%(self.target, self.ident))
         os.mkdir(os.path.join('results', self.ident))
-        args = ['nmap', '-oX', self.resultsfile]
+        args = ['nmap', '-oX', self.resultsfile, '--script', 'vulners,default']
         if self.udp:
             args.append('-sU')
         else:
