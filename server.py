@@ -341,7 +341,6 @@ def forkjobs(jobspec):
                 job = VncScreenshot(hostkeys, port=port, password=vncpassword)
                 forkjob(job, scraperqueue)
                 jobids.append(job.ident)
-            forkjob(job, scraperqueue)
         elif typ == 'enum4linux':
             # Fetch results for target subnet, only screenshot those with open ports
             r = Results()
@@ -355,8 +354,13 @@ def forkjobs(jobspec):
             hostkeys = list(hosts.keys())
             if mask == '32':
                 hostkeys = [target]
-            job = Enum4Linux(hostkeys, domain=domain, user=user, password=password)
-            forkjob(job, scraperqueue)
+            n = 30
+            listlist = split(hostkeys, n)
+            jobids = []
+            for l in listlist:
+                job = Enum4Linux(hostkeys, domain=domain, user=user, password=password)
+                forkjob(job, scraperqueue)
+                jobids.append(job.ident)
         elif typ == 'snmpwalk':
             # Fetch results for target subnet, only screenshot those with open ports
             prefix = jobspec['prefix'] if 'prefix' in jobspec else None
