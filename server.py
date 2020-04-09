@@ -184,7 +184,7 @@ class JobsHandler(tornado.web.RequestHandler):
 def forkjobs(jobspec):
     print(json.dumps(jobspec, indent=4, sort_keys=True))
     scantypes = jobspec['scantypes'] if 'scantypes' in jobspec else []
-    foundonly = jobspec['found_only'] if 'found_only' in jobspec else False
+    foundonly = jobspec['onlyfound'] if 'onlyfound' in jobspec else False
     if foundonly == 'false' or foundonly == '0': # how stringly
         foundonly = False
     target = jobspec['target'] if 'target' in jobspec else None
@@ -214,7 +214,7 @@ def forkjobs(jobspec):
         othertypes.remove('masscan')
         otherjobspec = jobspec.copy()
         otherjobspec['scantypes'] = othertypes
-        otherjobspec['found_only'] = 'true'
+        otherjobspec['onlyfound'] = 'true'
         scantypes = ['masscan']
         posthook = lambda: forkjobs(otherjobspec)
 
