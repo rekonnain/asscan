@@ -397,6 +397,20 @@ def forkjobs(jobspec):
             hostkeys = list(hosts.keys())
             job = Ms17_010(hostkeys)
             forkjob(job, scraperqueue)
+        elif typ == 'ms12_020':
+            # Fetch results for target subnet, only screenshot those with open ports
+            port = '3389'
+            r = Results()
+            r.read_all('results')
+            hosts = r.hosts
+            hosts = filter_by_network(hosts, target, mask)
+            if foundonly:
+                sys.stderr.write('0: %s\n'%str(list(hosts.keys())))
+                hosts = filter_by_port(hosts, port)
+                sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
+            hostkeys = list(hosts.keys())
+            job = Ms12_020(hostkeys)
+            forkjob(job, scraperqueue)
         elif typ == 'sleep':
             job = SleepJob()
             forkjob(job, nmapqueue)

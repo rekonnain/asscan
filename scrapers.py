@@ -309,4 +309,49 @@ class Ms17_010(ScraperJob):
                  'port': self.port }
         open('info.json','w').write(json.dumps(meta, indent=4,sort_keys=True))
         f.close()
+
+
+class Ms12_020(ScraperJob):
+    def __init__(self, targets, processes=4):
+        super().__init__()
+        self.targets = targets
+        self.path = 'results'
+        self.scantype='ms12_020'
+        self.targets = targets
+    
+    def scan(self):
+        self.port = '3389'
+        os.chdir(self.path)
+        try:
+            os.mkdir(self.ident)
+        except:
+            pass
+        os.chdir(self.ident)
+
+        targetqueue = Queue(maxsize = 8)
+        os.system('../../scanners/ms12_020.sh %s > output.txt'%' '.join(self.targets))
+        self.postprocess()
+        sys.stderr.write("ms12_020 task done\n")
+
+    def postprocess(self):
+        results = []
+        #line looks like:
+        # [*] 192.168.9.5:3389 - Cannot reliably check exploitability.
+        re_shit = re.compile('\[.\]\s([^:]*):[0-9]+\s+-\s(.*)')
+        hostresults = collections.defaultdict(list)
+        for line in open('output.txt','r').readlines():
+            m = re_shit.match(line.strip())
+            if m and m.groups():
+                hostresults[m.groups()[0]].append(m.groups()[1])
+        for key in hostresults.keys():
+            results.append({'host': key, 'scantype': 'ms12_020', 'status': ''.join(hostresults[key]), 'port': self.port})
+            
+        f = open('results.json','w')
+        f.write(json.dumps(results, indent=4, sort_keys=True))
+        meta = { 'scantype': 'ms12_020',
+                 'jobid': self.ident,
+                 'target': self.targets,
+                 'port': self.port }
+        open('info.json','w').write(json.dumps(meta, indent=4,sort_keys=True))
+        f.close()
         

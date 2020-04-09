@@ -113,6 +113,17 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />MS17-010
         </div>
+        <div
+          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+        >
+          <input
+            type="checkbox"
+            name="scantype"
+            value="ms12_020"
+            v-model="values.ms12_020"
+            class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
+          />MS12-020
+        </div>
       </div>
 
       <div class="mt-4 flex items-center justify-between">
@@ -276,6 +287,7 @@ export default {
         vnc: false,
         bluekeep: false,
         ms17_010: false,
+        ms12_020: false,
         onlyfound: false
       }
     };
@@ -377,6 +389,10 @@ export default {
       if (this.values.ms17_010) {
         scantypes.push("ms17_010");
         this.values.ms17_010 = false;
+      }
+      if (this.values.ms12_020) {
+        scantypes.push("ms12_020");
+        this.values.ms12_020 = false;
       }
 
       payload.scantypes = scantypes;
