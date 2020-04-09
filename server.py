@@ -181,6 +181,9 @@ class JobsHandler(tornado.web.RequestHandler):
         jobspec = json_decode(self.request.body)
         self.write(forkjobs(jobspec))
 
+def split(lst, n):
+    return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n )]
+        
 def forkjobs(jobspec):
     print(json.dumps(jobspec, indent=4, sort_keys=True))
     scantypes = jobspec['scantypes'] if 'scantypes' in jobspec else []
@@ -252,7 +255,7 @@ def forkjobs(jobspec):
                 hosts = filter_by_missing_scan(hosts, 'nmap')
                 hostkeys = list(hosts.keys())
                 n = 32
-                hostkeylists = [hostkeys[i * n:(i + 1) * n] for i in range((len(hostkeys) + n - 1) // n )]
+                hostkeylists = split(hostkeys, n)
                 jobids = []
                 for kl in hostkeylists:
                     job = Nmap(kl)
@@ -292,8 +295,13 @@ def forkjobs(jobspec):
             hostkeys = list(hosts.keys())
             if mask == '32':
                 hostkeys = [target]
-            job = WebScreenshot(list(hosts.keys()), scheme, port)
-            forkjob(job, scraperqueue)
+            n = 30
+            listlist = split(hostkeys, n)
+            jobids = []
+            for l in listlist:
+                job = WebScreenshot(l, scheme, port)
+                forkjob(job, scraperqueue)
+                jobids.append(job.ident)
         elif typ == 'rdpscreenshot':
             port = jobspec['port'] if 'port' in jobspec else '3389'
             r = Results()
@@ -306,8 +314,13 @@ def forkjobs(jobspec):
             if mask == '32':
                 hostkeys = [target]
             print('hostkeys %s'%str(hostkeys))
-            job = RdpScreenshot(hostkeys, domain=domain, user=user, password=password)
-            forkjob(job, scraperqueue)
+            n = 30
+            listlist = split(hostkeys, n)
+            jobids = []
+            for l in listlist:
+                job = RdpScreenshot(l, domain=domain, user=user, password=password)
+                forkjob(job, scraperqueue)
+                jobids.append(job.ident)
         elif typ == 'vncscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
             port = jobspec['port'] if 'port' in jobspec else '5901'
@@ -321,7 +334,13 @@ def forkjobs(jobspec):
             if mask == '32':
                 hostkeys = [target]
             print('hostkeys %s'%str(hostkeys))
-            job = VncScreenshot(hostkeys, port=port, password=vncpassword)
+            n = 30
+            listlist = split(hostkeys, n)
+            jobids = []
+            for l in listlist:
+                job = VncScreenshot(hostkeys, port=port, password=vncpassword)
+                forkjob(job, scraperqueue)
+                jobids.append(job.ident)
             forkjob(job, scraperqueue)
         elif typ == 'enum4linux':
             # Fetch results for target subnet, only screenshot those with open ports
