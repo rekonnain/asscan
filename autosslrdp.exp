@@ -16,10 +16,20 @@ set user [lindex $argv 2]
 set password [lindex $argv 3]
 
 set timeout 10
-spawn xfreerdp  /u:$user@$domain /p:$password /v:$host
-match_max 100000
-expect "Do you trust the above certificate? (Y/T/N) "
-send -- "yes\r"
-expect "*\n"
-sleep 4
-expect eof
+if { $user eq "" && $domain eq "" && $password eq "" } {
+    spawn rdesktop -u '' $host
+    match_max 100000
+    expect "Do you trust this certificate (yes/no)? "
+    send -- "yes\r"
+    expect "*\n"
+    sleep 4
+    expect eof
+} else {
+    spawn xfreerdp /u:$user@$domain /p:$password /v:$host
+    match_max 100000
+    expect "Do you trust the above certificate? (Y/T/N) "
+    send -- "Y\r"
+    expect "*\n"
+    sleep 4
+    expect eof
+}

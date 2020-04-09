@@ -79,13 +79,17 @@ class ScraperJob(Job):
 
 # simple enough job to be handled by the superclass
 class RdpScreenshot(ScraperJob):
-    def __init__(self, targets, processes=4, domain='', user='', password=''):
+    def __init__(self, targets, processes=4, domain=None, user=None, password=None):
         super().__init__(processes)
         self.targets = targets
         d("rdpscreenshot u=%s d=%s p=%s targets %s"%(user,domain,password,str(self.targets)))
         self.scantype='rdpscreenshot'
         # run the rdp-screenshotter script with an offscreen window
-        self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
+        if type(domain) == str and type(user) == str and type(password) == str\
+           and len(domain) > 0 and len(user) > 0:
+            self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
+        else:
+            self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s"%(target)
         self.output_filename_pattern = '([0-9.]+)\.png'
     
 class VncScreenshot(ScraperJob):
@@ -94,7 +98,12 @@ class VncScreenshot(ScraperJob):
         self.targets = targets
         self.scantype = 'vncscreenshot'
         self.port = port
-        self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s %s output/%s.png "%(target, port, password, target)
+        if type(domain) == str and type(user) == str and type(password) == str\
+           and len(domain) > 0 and len(user) > 0:
+            self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s %s output/%s.png "%(target, port, password, target)
+        else:
+            self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s output/%s.png "%(target, port, target)
+            
         self.output_filename_pattern = '([0-9.]+)\.png'
         
         
