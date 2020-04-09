@@ -133,15 +133,21 @@ class WebScreenshot(ScraperJob):
 
             
 class Enum4Linux(ScraperJob):
-    def __init__(self, targets, processes=4, domain='', user='', password=''):
+    def __init__(self, targets, processes=4, domain=None, user=None, password=None):
         super().__init__(targets)
         self.path = 'results'
         self.scantype='enum4linux'
         self.targets = targets
         self.port = '445'
-        self.commandline = lambda scheme, target, port:\
-            "enum4linux -u '%s\\%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
-            (domain,user,password, target, target, target)
+        if type(domain) == str and type(user) == str and type(password) == str\
+           and len(domain) > 0 and len(user) > 0:
+            self.commandline = lambda scheme, target, port:\
+                "enum4linux -u '%s\\%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
+                (domain,user,password, target, target, target)
+        else:
+            self.commandline = lambda scheme, target, port:\
+                "enum4linux %s 2>output/err.%s | tee output/out.enum.%s"%\
+                (target, target, target)
         self.output_filename_pattern = 'out\.enum\.([0-9.]+)'
 
 
