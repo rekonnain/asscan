@@ -1,7 +1,9 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import sys,json
 
 filename='notes.json'
+
 
 def notesforhost(hostname):
     j = {}
@@ -14,6 +16,7 @@ def notesforhost(hostname):
     else:
         return {}
 
+
 def savenote(host, note):
     j = {}
     try:
@@ -22,6 +25,7 @@ def savenote(host, note):
         pass
     j[host] = note
     open(filename,'w').write(json.dumps(j, sort_keys = True, indent = 4))
+
 
 def deletenote(host):
     j = {}
@@ -32,6 +36,7 @@ def deletenote(host):
     except:
         pass
     
+
 def hostswithcomments():
     try:
         j = json.loads(open(filename,'r').read())

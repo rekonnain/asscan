@@ -1,0 +1,20 @@
+version: '3'
+services:
+  asscan:
+    hostname: asscan
+    volumes:
+      - ..:/app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8888:8888"
+  asscan_dev:
+    hostname: asscan
+    volumes:
+      - ..:/app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    ports:
+      - "8888:8888"
