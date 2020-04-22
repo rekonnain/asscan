@@ -29,17 +29,21 @@ clean: ## Cleanup all the things
 dev: ## local dev/test environment
 	@echo "Building test env with docker-compose"
 	@if [ -f /.dockerenv ]; then echo "Don't run make docker inside docker container" && exit 1; fi;
+	# remove the --build flag if you don't want to rebuild the container every time
+	#docker-compose -f docker/docker-compose.yml up --build asscan_dev
 	docker-compose -f docker/docker-compose.yml up asscan_dev
-	@docker-compose -f docker/docker-compose.yml run asscan_dev /bin/bash
+	docker-compose -f docker/docker-compose.yml run asscan_dev /bin/bash
 
 docker: ## build docker container for testing
 	@echo "Building test env with docker-compose"
 	@if [ -f /.dockerenv ]; then echo "Don't run make docker inside docker container" && exit 1; fi;
-	docker-compose -f docker/docker-compose.yml up --build asscan
+	# remove the --build flag if you don't want to rebuild the container every time
+	#docker-compose -f docker/docker-compose.yml up --build asscan
+	docker-compose -f docker/docker-compose.yml up asscan
 
 python: ## setup python3
 	if [ -f $(REQS) ]; then python3 -m pip install -r$(REQS); fi
 
 test: python ## run tests in container
-	if [ -f 'python/requirements-test.txt' ]; then python3 -m pip install -rpython/requirements-test.txt; fi
+	if [ -f 'test/requirements-test.txt' ]; then python3 -m pip install -rtest/requirements-test.txt; fi
 	tox

@@ -73,7 +73,7 @@ function ocr {
 # Launch rdesktop in the background
 echo -e "${blue} Initiating funny rdesktop connection to ${host}"
 #rdesktop -u "" -a 16 $host &
-../../autosslrdp.exp $host $domain $user $password &
+./autosslrdp.exp $host $domain $user $password &
 pid=$!
 
 # Get window id
