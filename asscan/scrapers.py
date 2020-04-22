@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 from scanners import Job
 from multiprocessing import Process, Queue

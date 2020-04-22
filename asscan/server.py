@@ -1,5 +1,7 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+import logging
+from pathlib import Path
 import tornado.ioloop
 import tornado.web
 from tornado.escape import json_decode
@@ -28,6 +30,7 @@ scrapercount = 0
 
 alljobs = {}
 
+
 def forkjob(job, queue):
     def task():
         sys.stderr.write("Queueing %s\n"%job.ident)
@@ -45,12 +48,14 @@ def forkjob(job, queue):
     p = Process(target = task)
     p.start()
 
+
 class ScansHandler(tornado.web.RequestHandler):
     def get(self):
         # Returns all past scans
         r=Results()
         r.read_all('results')
         self.write({'scans': sorted(r.scans, key=lambda x:x['target'])})
+
 
 class NotesHandler(tornado.web.RequestHandler):
     def get(self, shit):
@@ -60,16 +65,19 @@ class NotesHandler(tornado.web.RequestHandler):
         else:
             self.write({})
 
+
     def post(self, dummy):
         x = json_decode(self.request.body)
         for key, val in x.items():
             notes.savenote(key,val)
         self.write({})
 
+
     def delete(self, args):
         ip = args.split('/')[0]
         notes.deletenote(ip)
         self.write({})
+
 
 class ResultsHandler(tornado.web.RequestHandler):
     def get(self, shit):
@@ -181,9 +189,11 @@ class JobsHandler(tornado.web.RequestHandler):
         jobspec = json_decode(self.request.body)
         self.write(forkjobs(jobspec))
 
+
 def split(lst, n):
     return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n )]
-        
+
+
 def forkjobs(jobspec):
     print(json.dumps(jobspec, indent=4, sort_keys=True))
     scantypes = jobspec['scantypes'] if 'scantypes' in jobspec else []
@@ -448,6 +458,7 @@ def forkjobs(jobspec):
 
         
 def make_app():
+    logging.debug('Configure web app')
     return tornado.web.Application([
         (r"/jobs/(.*)", JobsHandler),
         (r"/api/jobs/(.*)", JobsHandler), # /api for the vue dev server api router
@@ -468,7 +479,8 @@ def make_app():
 
 def main():
     app = make_app()
-    app.listen(8888, address='127.0.0.1') # better not expose this
+    logging.debug('Start listening')
+    app.listen(8888, address='0.0.0.0')
     tornado.ioloop.IOLoop.current().start()
 
 if __name__ == "__main__":

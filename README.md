@@ -1,7 +1,6 @@
 # ASSCAN - Automated Subnet Scanner
 
-![screenshot](screenshot.png)
-
+![screenshot](docs/screenshot.png)
 
 ## Background
 

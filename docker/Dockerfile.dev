@@ -1,0 +1,31 @@
+FROM kalilinux/kali-rolling
+WORKDIR /app
+ADD . /app
+
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y apt-utils; \
+DEBIAN_FRONTEND=noninteractive apt install -y \
+git xvfb xdotool bc phantomjs imagemagick python3-pip \
+nmap masscan expect curl; \
+cd /app && make python; \
+DEBIAN_FRONTEND=noninteractive apt -y install golang; \
+go get github.com/ffuf/ffuf
+
+# install metasploit
+RUN curl -s https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall; \
+chmod 755 /tmp/msfinstall; \
+ /tmp/msfinstall
+
+
+# To develop the UI, install npm, maybe vue-cli, edit the files in 
+# ui/asscan, and run npm install and npm run serve to access the dev
+# server or npm run build to produce a new build.
+
+# You can uncomment the below lines for UI dev in docker container
+# but it takes a long time to build
+#RUN DEBIAN_FRONTEND=noninteractive apt -y install wget python g++ make checkinstall fakeroot;\
+#src=$(mktemp -d) && cd $src; \
+#wget -N http://nodejs.org/dist/node-latest.tar.gz; \
+#tar xzvf node-latest.tar.gz && cd node-v*; \
+#./configure; \
+#fakeroot checkinstall -y --install=no --pkgversion $(echo $(pwd) | sed -n -re's/.+node-v(.+)$/\1/p') make -j$(($(nproc)+1)) install; \
+#dpkg -i node_*.deb
