@@ -31,6 +31,16 @@
         @keyup.enter="service(servicefilter)"
       />
     </div>
+    <div class="filterbox flex">
+      Content:
+      <input
+        v-model="contentfilter"
+        type="text"
+        placeholder="zyxel"
+        class="block flex-1 bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg ml-2 py-1 px-2 block w-full appearance-none leading-normal"
+        @keyup.enter="content(contentfilter)"
+      />
+    </div>
     <div class="text-black pt-1 px-2 m-2 rounded focus:outline-none focus:shadow-outline">
       <input
         type="checkbox"
@@ -84,7 +94,9 @@ export default {
       prefixfilter: "",
       portfilter: "",
       servicefilter: "",
+      contentfilter: "",
       vulnsEnabled: false,
+      hasNotes: false,
       screenshotsEnabled: false
     };
   },
@@ -105,6 +117,12 @@ export default {
       this.$store.dispatch({
         type: type.setService,
         service
+      });
+    },
+    content(content) {
+      this.$store.dispatch({
+        type: type.setContent,
+        content
       });
     },
     vulns(vulnsEnabled) {
@@ -129,6 +147,11 @@ export default {
       this.prefixfilter = "";
       this.portfilter = "";
       this.servicefilter = "";
+      this.contentfilter = "";
+      this.$store.dispatch({
+        type: type.setContent,
+        content: ""
+      });
       this.$store.dispatch({
         type: type.setService,
         service: ""
@@ -156,6 +179,11 @@ export default {
     },
     apply() {
       console.log("apply");
+      console.log('content filter is: ' + this.contentfilter)
+      this.$store.dispatch({
+        type: type.setContent,
+        content: this.contentfilter
+      });
       this.$store.dispatch({
         type: type.setService,
         service: this.servicefilter

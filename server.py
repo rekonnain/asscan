@@ -98,7 +98,8 @@ class ResultsHandler(tornado.web.RequestHandler):
             vulns = self.get_query_argument('vulns', None)
             screenshots = self.get_query_argument('screenshots', None)
             notes = self.get_query_argument('notes', None)
-            sys.stderr.write('filtering: prefix=%s port=%s service=%s vulns=%s screenshots=%s\n'%(str(prefix), str(port), str(service), str(vulns), str(screenshots)))
+            content = self.get_query_argument('content', None)
+            sys.stderr.write('filtering: prefix=%s port=%s service=%s vulns=%s screenshots=%s content=%s\n'%(str(prefix), str(port), str(service), str(vulns), str(screenshots), str(content)))
             r = Results()
             r.read_all('results')
             filtered = r.hosts
@@ -123,6 +124,9 @@ class ResultsHandler(tornado.web.RequestHandler):
             if notes and notes == 'true':
                 filtered = filter_by_having_notes(filtered)
                 sys.stderr.write('count notes=%d\n'%(len(filtered.keys())))
+            if content and len(content) > 0 and content != 'undefined':
+                filtered = filter_by_content(filtered, content)
+                sys.stderr.write('count content=%d\n'%len(filtered.keys()))
             sys.stderr.write('count final=%d\n'%(len(filtered.keys())))
             self.write({'ips':sorted_addresses(filtered.keys())})
         elif args[0] == 'all':

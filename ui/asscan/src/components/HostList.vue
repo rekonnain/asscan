@@ -50,6 +50,9 @@ export default {
     },
     notes() {
       return this.$store.state.notes;
+    },
+    content() {
+      return this.$store.state.contentFilter
     }
   },
   methods: {
@@ -67,6 +70,25 @@ export default {
     refresh() {
       this.updateAnyway();
     },
+    async updateWithContent(content) {
+      console.log('vittu content = ' + content)
+      const hostlist = await axios.get(
+        "/api/results/filter?content=" +
+          content +
+          "&prefix=" +
+          this.$store.state.prefixFilter +
+          "&port=" +
+          this.$store.state.portFilter +
+          "&service=" +
+          this.$store.state.serviceFilter +
+          "&vulns=" +
+          this.$store.state.vulns +
+          "&screenshots=" +
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
+      );
+      this.hosts = hostlist.data["ips"];
+    },
     async updateWithPrefix(prefix) {
       const hostlist = await axios.get(
         "/api/results/filter?prefix=" +
@@ -80,6 +102,7 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
+          + "&content=" + this.$store.state.contentFilter
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -96,6 +119,7 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
+          + "&content=" + this.$store.state.contentFilter
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -112,6 +136,7 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
+          + "&content=" + this.$store.state.contentFilter
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -128,10 +153,12 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + notes
+          + "&content=" + this.$store.state.contentFilter
       );
       this.hosts = hostlist.data["ips"];
     },
     async updateAnyway() {
+      console.log('vittu content = ' + this.$store.state.content)
       const hostlist = await axios.get(
         "/api/results/filter?port=" +
           this.$store.state.portFilter +
@@ -144,6 +171,7 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
+          + "&content=" + this.$store.state.contentFilter
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -160,6 +188,7 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
+          + "&content=" + this.$store.state.contentFilter
       );
       this.hosts = hostlist.data["ips"];
     }
@@ -179,6 +208,10 @@ export default {
     },
     notes(notes) {
       this.updateWithNotes(notes);
+    },
+    content(content) {
+      console.log('slerba')
+      this.updateWithContent(content);
     },
     refresh() {
       console.log("vittu");

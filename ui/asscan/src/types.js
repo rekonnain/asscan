@@ -5,4 +5,5 @@ export const setService = 'setService';
 export const setVulns = 'setVulns';
 export const setScreenshots = 'setScreenshots';
 export const setNotes = 'setNotes';
+export const setContent = 'setContent';
 export const refresh = 'refresh';

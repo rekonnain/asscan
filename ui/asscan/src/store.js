@@ -8,6 +8,7 @@ export default new Vuex.Store({
         portFilter: '',
         prefixFilter: '',
         serviceFilter: '',
+        contentFilter: '',
         vulns: false,
         screenshots: false,
         notes: false,
@@ -17,6 +18,7 @@ export default new Vuex.Store({
         currentIp: state => state.currentIp,
         portFilter: state => state.portFilter,
         prefixFilter: state => state.prefixFilter,
+        contentFilter : state => state.contentFilter,
         vulns: state => state.vulns,
         screenshots: state => state.screenshots,
         notes: state => state.notes,
@@ -34,6 +36,9 @@ export default new Vuex.Store({
         },
         setService(context, value) {
             context.commit('setService', value.service)
+        },
+        setContent(context, value) {
+            context.commit('setContent', value.content)
         },
         setVulns(context, value) {
             context.commit('setVulns', value.vulns)
@@ -62,6 +67,9 @@ export default new Vuex.Store({
         },
         setService(state, service) {
             state.serviceFilter = service;
+        },
+        setContent(state, content) {
+            state.contentFilter = content;
         },
         setVulns(state, vulns) {
             state.vulns = vulns;

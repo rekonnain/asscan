@@ -105,6 +105,34 @@ def filter_by_screenshots(hosts):
                 filtered[key] = hosts[key]
     return filtered
 
+# recursively checks if any string value contains content
+def match_leaf(d, content):
+    tip = True
+    if not dict in map(type, d.values()) and not list in map(type, d.values()):
+        tip = False
+    for key, val in d.items():
+        if type(val) == str:
+            if content.lower() in val.lower():
+                return True
+        if not tip and content.lower() in key.lower():
+            return True
+        if type(val) == dict:
+            return match_leaf(val, content)
+        elif type(val) == list:
+            return True in map(lambda x:match_leaf(x, content), val)
+    return False
+
+# checks if the content is matched by any values in the leaf dicts
+# also if the dict doesn't have dicts as values, checks the keys as well
+def filter_by_content(hosts, content):
+    filtered = {}
+    for key in hosts.keys():
+        for scan in hosts[key]:
+            if match_leaf(scan, content):
+                filtered[key] = hosts[key]
+    return filtered
+    
+
 def get_results(args, filters={}):
     if args[0] == 'ip': # single result by ip, /results/ip/192.168.0.1
         ip = args[1]
