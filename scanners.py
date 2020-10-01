@@ -176,7 +176,7 @@ class Masscan(ScanJob):
     def scan(self):
         sys.stderr.write("Starting masscan on %s, jobid %s\n"%(self.target, self.ident))
         os.mkdir(os.path.join('results', self.ident))
-        args = ['masscan', '-p'+self.ports, '--rate=20000', '-oX', self.resultsfile, self.target]
+        args = ['masscan', '-p'+self.ports, '--rate=40000', '-oX', self.resultsfile, self.target]
         self.cmdline = ' '.join(args)
         super().run(args)
         meta = { 'scantype': 'masscan',

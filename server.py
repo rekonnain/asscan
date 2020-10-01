@@ -9,6 +9,7 @@ import notes
 from scanners import *
 from scrapers import *
 from results import *
+from scheduler import Scheduler
 import re
 from os.path import join
 import collections
@@ -17,33 +18,12 @@ re_uuid = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}
 
 # queues for tasks of different kinds. The maxsize parameter determines
 # how many tasks can be active in parallel at any given time
-massqueue = Queue(maxsize = 1)
-masscount = 0
-nmapqueue = Queue(maxsize = 4)
-nmapcount = 0
-vulnqueue = Queue(maxsize = 16)
-vulncount = 0
-scraperqueue = Queue(maxsize = 8)
-scrapercount = 0
+massqueue = Scheduler(1)
+nmapqueue = Scheduler(4)
+vulnqueue = Scheduler(16)
+scraperqueue = Scheduler(8)
 
 alljobs = {}
-
-def forkjob(job, queue):
-    def task():
-        sys.stderr.write("Queueing %s\n"%job.ident)
-        queue.put(job.ident)
-        alljobs[job.ident] = job
-        job.scan()
-        del alljobs[job.ident]
-        x=queue.get()
-        sys.stderr.write('Job %s done\n'%job.ident)
-        if job.posthook:
-            sys.stderr.write('Executing post hook for job %s\n'%job.ident)
-            job.posthook()
-        sys.stderr.write("Removed %s from queue\n"%x)
-        sys.stderr.write("Queue length %d\n"%queue.qsize())
-    p = Process(target = task)
-    p.start()
 
 class ScansHandler(tornado.web.RequestHandler):
     def get(self):
@@ -166,10 +146,10 @@ class JobsHandler(tornado.web.RequestHandler):
     def get(self, shit):
         args = shit.split('/')
         if args[0] == 'overview':
-            jobs = {'nmap': nmapqueue.qsize(),
-                    'masscan': massqueue.qsize(),
-                    'scrapers': scraperqueue.qsize(),
-                    'vuln': vulnqueue.qsize()}
+            jobs = {'nmap': nmapqueue.status(),
+                    'masscan': massqueue.status(),
+                    'scrapers': scraperqueue.status(),
+                    'vuln': vulnqueue.status()}
             self.write(jobs)
         elif args[0] == 'status':
             status = {}
@@ -249,7 +229,6 @@ def forkjobs(jobspec):
                 else: # default port list, see the masscan class
                     job = Masscan(t)
                 massjobs.append(job)
-                #forkjob(job, massqueue)
                 jobids.append(job.ident)
         elif typ == 'nmap':
             if foundonly: # only scan hosts found earlier with masscan
@@ -263,7 +242,7 @@ def forkjobs(jobspec):
                 jobids = []
                 for kl in hostkeylists:
                     job = Nmap(kl)
-                    forkjob(job, nmapqueue)
+                    nmapqueue.add_job(job)
                     jobids.append(job.ident)
             else:
                 targetspec = [target + '/' + mask]
@@ -274,18 +253,18 @@ def forkjobs(jobspec):
                         targetspec.append(str(x.network_address) + '/' + maxmask)
                 for t in targetspec:
                     job = Nmap(t)
-                    forkjob(job, nmapqueue)
+                    nmapqueue.add_job(job)
                     jobids.append(job.ident)
         elif typ == 'nmap-udp': # TODO missing the foundonly flag handling!
             udp = True
             targetspec = None
             prefix = jobspec['prefix'] if 'prefix' in jobspec else None
             job = Nmap(targetspec, udp=True)
-            forkjob(job, nmapqueue)
+            nmapqueue.add_job(job)
         elif typ == 'smbvuln': # check if this still works. OTOH ms17-010 has its own checker now
             targetspec = target + '/' + mask
             job = SmbVuln(targetspec)
-            forkjob(job, vulnqueue)
+            vulnqueue.add_job(job)
         elif typ == 'webscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
             port = jobspec['port'] if 'port' in jobspec else '80'
@@ -304,7 +283,7 @@ def forkjobs(jobspec):
             jobids = []
             for l in listlist:
                 job = WebScreenshot(l, scheme, port)
-                forkjob(job, scraperqueue)
+                scraperqueue.add_job(job)
                 jobids.append(job.ident)
         elif typ == 'rdpscreenshot':
             port = jobspec['port'] if 'port' in jobspec else '3389'
@@ -323,7 +302,7 @@ def forkjobs(jobspec):
             jobids = []
             for l in listlist:
                 job = RdpScreenshot(l, domain=domain, user=user, password=password)
-                forkjob(job, scraperqueue)
+                scraperqueue.add_job(job)
                 jobids.append(job.ident)
         elif typ == 'vncscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
@@ -343,7 +322,7 @@ def forkjobs(jobspec):
             jobids = []
             for l in listlist:
                 job = VncScreenshot(hostkeys, port=port, password=vncpassword)
-                forkjob(job, scraperqueue)
+                scraperqueue.add_job(job)
                 jobids.append(job.ident)
         elif typ == 'enum4linux':
             # Fetch results for target subnet, only screenshot those with open ports
@@ -363,7 +342,7 @@ def forkjobs(jobspec):
             jobids = []
             for l in listlist:
                 job = Enum4Linux(hostkeys, domain=domain, user=user, password=password)
-                forkjob(job, scraperqueue)
+                scraperqueue.add_job(job)
                 jobids.append(job.ident)
         elif typ == 'snmpwalk':
             # Fetch results for target subnet, only screenshot those with open ports
@@ -376,7 +355,7 @@ def forkjobs(jobspec):
             if mask == '32':
                 hostkeys = [target]
             job = Snmpwalk(hostkeys)
-            forkjob(job, scraperqueue)
+            scraperqueue.add_job(job)
         elif typ == 'ffuf':
             # Fetch results for target subnet, only screenshot those with open ports
             port = jobspec['port'] if 'port' in jobspec else '80'
@@ -390,7 +369,7 @@ def forkjobs(jobspec):
                 sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
             hostkeys = list(hosts.keys())
             job = Ffuf(hostkeys, port=port)
-            forkjob(job, scraperqueue)
+            scraperqueue.add_job(job)
         elif typ == 'bluekeep':
             # Fetch results for target subnet, only screenshot those with open ports
             port = '3389'
@@ -408,7 +387,7 @@ def forkjobs(jobspec):
             jobids = []
             for kl in hostkeylists:
                 job = Bluekeep(kl)
-                forkjob(job, scraperqueue)
+                scraperqueue.add_job(job)
                 jobids.append(job.ident)
         elif typ == 'ms17_010':
             # Fetch results for target subnet, only screenshot those with open ports
@@ -423,7 +402,7 @@ def forkjobs(jobspec):
                 sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
             hostkeys = list(hosts.keys())
             job = Ms17_010(hostkeys)
-            forkjob(job, scraperqueue)
+            scraperqueue.add_job(job)
         elif typ == 'ms12_020':
             # Fetch results for target subnet, only screenshot those with open ports
             port = '3389'
@@ -437,17 +416,17 @@ def forkjobs(jobspec):
                 sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
             hostkeys = list(hosts.keys())
             job = Ms12_020(hostkeys)
-            forkjob(job, scraperqueue)
+            scraperqueue.add_job(job)
         elif typ == 'sleep':
             job = SleepJob()
-            forkjob(job, nmapqueue)
+            nmapqueue.add_job(job)
         else:
             pass
 
     if len(massjobs) > 0:
         massjobs[-1].posthook = posthook
         for job in massjobs:
-            forkjob(job, massqueue)
+            massqueue.add_job(job)
     return {'status': 'ok'} # TODO, return some info of queued jobs
 
         
