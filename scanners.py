@@ -19,6 +19,7 @@ class Job:
         self.targets = []
         self.scantype = 'n/a'
         self.posthook = None
+        self.timeout = 900
 
     def run(self, argv):
         sys.stderr.write("Starting job: %s\n"%' '.join(argv))

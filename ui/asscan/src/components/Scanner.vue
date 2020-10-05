@@ -53,10 +53,10 @@
           <input
             type="checkbox"
             name="scantype"
-            value="enum4linux"
-            v-model="values.enum4linux"
+            value="smbenum"
+            v-model="values.smbenum"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
-          />enum4linux
+          />smb-enum
         </div>
         <div
           class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
@@ -218,7 +218,7 @@
         <input
           type="checkbox"
           name="scantype"
-          value="enum4linux"
+          value="smbenum"
           v-model="values.onlyfound"
           class="mr-2 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
         />Only scan discovered hosts
@@ -281,7 +281,7 @@ export default {
         nmap: false,
         ffuf: false,
         snmp: false,
-        enum4linux: false,
+        smbenum: false,
         rdp: false,
         web: false,
         vnc: false,
@@ -374,9 +374,9 @@ export default {
         scantypes.push("snmpwalk");
         this.values.snmp = false;
       }
-      if (this.values.enum4linux) {
-        scantypes.push("enum4linux");
-        this.values.enum4linux = false;
+      if (this.values.smbenum) {
+        scantypes.push("smbenum");
+        this.values.smbenum = false;
       }
       if (this.values.ffuf) {
         scantypes.push("ffuf");

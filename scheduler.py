@@ -21,11 +21,16 @@ class Scheduler:
                 work_q.put(job)
                 sys.stderr.write("Executing job %s\n"%job.ident)
                 def task():
+                    t1 = time.time()
                     job.scan()
                     if job.posthook:
                         sys.stderr.write('Executing post hook for job %s\n'%job.ident)
                         job.posthook()
-                    work_q.get()
+                    try:
+                        x = work_q.get(timeout=job.timeout)
+                        sys.stderr.write('delta %.2f x: %s\n'%(time.time()-t1,str(x)))
+                    except:
+                        raise
                     sys.stderr.write("Done with job %s\n"%job.ident)
                 p = Process(target = task)
                 p.start()
@@ -59,20 +64,21 @@ i = idgen()
     
 class FakeScan:
     def __init__(self):
-        self.timeout = 2.0 + 5.0 * random()
+        self.duration = 1.0 + 5.0 * random()
         self.ident = i.getid()
         self.posthook = None
+        self.timeout = 2
         
     def scan(self):
         sys.stdout.write("Scanning... %s\n" % self.ident)
-        time.sleep(self.timeout)
+        time.sleep(self.duration)
         sys.stdout.write("Scanned %s\n" % self.ident)
 
 if __name__=='__main__':
     scans = []
-    for x in range(100):
+    for x in range(5):
         scans.append(FakeScan())
-    s = Scheduler(32)
+    s = Scheduler(2)
     for x in scans:
         s.add_job(x)
         sys.stderr.write("Added job %s to scheduler\n"%x.ident)

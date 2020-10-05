@@ -34,6 +34,7 @@
       <p v-if="result['cmdline']">Scanner args: <pre class="text-xs">{{result['cmdline']}}</pre></p>
       <p v-if="result['scantime']">Scan time: {{result['scantime']}}</p>
       <p v-if="result['jobid']">Job ID: {{result['jobid']}}</p>
+
       <p v-if="result['scantype'] == 'masscan'">
         Open ports:
         <b class="pl-2" v-for="x in result['ports']" :key="x">
@@ -64,7 +65,20 @@
       </div>
       <div v-else-if="result['scantype'].includes('enum4linux')">
         <div v-for="(portvals, port) in result['ports']" :key="port" class="object-fill">
+          <div class="flex">
+            <p class="underline"><a target="_blank" :href="'/api/'+portvals.file">Full data</a></p>
+          </div>
           <div class="flex justify-center" style="height: 480px">
+          <iframe :src="'/api/'+portvals.file" class="object-fill" style="position: relative; height: 100%; width: 100%;" />
+          </div>
+        </div>
+      </div>
+      <div v-else-if="result['scantype'].includes('smbenum')">
+        <div v-for="(portvals, port) in result['ports']" :key="port" class="object-fill">
+          <div class="flex">
+            <p class="underline"><a target="_blank" :href="'/api/'+portvals.file">Full data</a></p>
+          </div>
+          <div class="flex justify-center" style="height: 600px">
           <iframe :src="'/api/'+portvals.file" class="object-fill" style="position: relative; height: 100%; width: 100%;" />
           </div>
         </div>
