@@ -324,7 +324,7 @@ def forkjobs(jobspec):
                 job = VncScreenshot(hostkeys, port=port, password=vncpassword)
                 scraperqueue.add_job(job)
                 jobids.append(job.ident)
-        elif typ == 'enum4linux':
+        elif typ == 'smbenum':
             # Fetch results for target subnet, only screenshot those with open ports
             r = Results()
             r.read_all('results')
@@ -341,7 +341,7 @@ def forkjobs(jobspec):
             listlist = split(hostkeys, n)
             jobids = []
             for l in listlist:
-                job = Enum4Linux(hostkeys, domain=domain, user=user, password=password)
+                job = SmbEnum(hostkeys, domain=domain, user=user, password=password)
                 scraperqueue.add_job(job)
                 jobids.append(job.ident)
         elif typ == 'snmpwalk':

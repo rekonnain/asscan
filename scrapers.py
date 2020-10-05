@@ -5,6 +5,7 @@ from multiprocessing import Process, Queue
 import os, sys, re, json
 from os.path import join
 import collections, types
+from log import log
 
 debug=True
 def d(m):
@@ -153,24 +154,26 @@ class WebScreenshot(ScraperJob):
         f.close()
 
             
-class Enum4Linux(ScraperJob):
+class SmbEnum(ScraperJob):
     def __init__(self, targets, processes=4, domain=None, user=None, password=None):
         super().__init__(targets)
         self.path = 'results'
-        self.scantype='enum4linux'
+        self.scantype='smbenum'
         self.targets = targets
         self.port = '445'
         if type(domain) == str and type(user) == str and type(password) == str\
-           and len(domain) > 0 and len(user) > 0:
+           and len(domain) > 0 and len(user) > 0 and len(password) > 0:
             for target in targets:
-                self.commandline[target] = \
-                "enum4linux -u '%s\\%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
-                    (domain,user,password, target, target, target)
+                self.commandline[target] = "../../scanners/smbenum.sh -a %s %s %s %s"%(domain,user,password,target)
+                #self.commandline[target] = \
+                #"enum4linux -u '%s//%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
+                #    (domain,user,password, target, target, target)
         else:
             for target in targets:
-                self.commandline[target] = \
-                "enum4linux %s 2>output/err.%s | tee output/out.enum.%s"%\
-                    (target, target, target)
+                self.commandline[target] = "../../scanners/smbenum.sh %s"%target
+                #self.commandline[target] = \
+                #"enum4linux %s 2>output/err.%s | tee output/out.enum.%s"%\
+                #    (target, target, target)
         self.output_filename_pattern = 'out\.enum\.([0-9.]+)'
 
 
@@ -314,7 +317,9 @@ class Ms17_010(ScraperJob):
         os.chdir(self.ident)
 
         targetqueue = Queue(maxsize = 8)
-        os.system('../../scanners/ms17_010.sh %s > output.txt'%' '.join(self.targets))
+        commandline = '../../scanners/ms17_010.sh %s > output.txt'%' '.join(self.targets)
+        log(commandline)
+        os.system(commandline)
         self.postprocess()
         sys.stderr.write("ms17_010 task done\n")
 
@@ -359,7 +364,9 @@ class Ms12_020(ScraperJob):
         os.chdir(self.ident)
 
         targetqueue = Queue(maxsize = 8)
-        os.system('../../scanners/ms12_020.sh %s > output.txt'%' '.join(self.targets))
+        commandline = '../../scanners/ms12_020.sh %s > output.txt'%' '.join(self.targets)
+        log(commandline)
+        os.system(commandline)
         self.postprocess()
         sys.stderr.write("ms12_020 task done\n")
 
