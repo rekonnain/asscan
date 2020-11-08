@@ -1,0 +1,15 @@
+version: '3.6'
+
+services:
+  ass:
+    build: .
+    ports:
+      - "8888:8888"  # remember to make sure the app listens to 0.0.0.0
+    volumes:
+      - type: bind
+        source: ./results
+        target: /ass/results
+    command: sh -c 'cd ass;./server.py 8888 0.0.0.0'
+
+volumes:
+  results:      
