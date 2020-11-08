@@ -2,6 +2,12 @@
 
 ![screenshot](screenshot.png)
 
+## News
+
+### 11/8/20 docker
+
+This works with docker now. See `Dockerfile` and `docker-compose.yml`. It probably makes more sense to run this on a container than dedicate a VM for it.
+
 
 ## Background
 
