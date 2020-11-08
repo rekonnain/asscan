@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import tornado.ioloop
 import tornado.web
 from tornado.escape import json_decode
@@ -13,6 +12,7 @@ import re
 from os.path import join
 import collections
 import ipaddress
+from log import log
 re_uuid = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z', re.I)
 
 # queues for tasks of different kinds. The maxsize parameter determines
@@ -472,7 +472,12 @@ def make_app():
 
 def main():
     app = make_app()
-    app.listen(8888, address='127.0.0.1') # better not expose this
+    if len(sys.argv) != 3:
+        sys.stderr.write("usage: %s listen-port listen-host\n" % sys.argv[0])
+        sys.stderr.write("If you run on anything else than inside a docker container,\n")
+        sys.stderr.write("listen-host should be 127.0.0.1 unless you know what you are doing\n")
+        sys.exit(0)
+    app.listen(int(sys.argv[1]), sys.argv[2])
     tornado.ioloop.IOLoop.current().start()
 
 if __name__ == "__main__":

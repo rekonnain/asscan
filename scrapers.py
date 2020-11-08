@@ -5,6 +5,7 @@ from multiprocessing import Process, Queue
 import os, sys, re, json
 from os.path import join
 import collections
+from log import log
 
 debug=True
 def d(m):
@@ -22,6 +23,7 @@ class ScraperJob(Job):
         self.scantype = 'scraper'
         # override
         self.commandline = lambda scheme, target, port: target
+        self.setuphook = None # set to an argumentless lambda if necessary
         self.output_filename_pattern = '([0-9.]+)\.png'
         self.port = '-1'
         self.scheme = ''
@@ -38,6 +40,9 @@ class ScraperJob(Job):
             pass
         os.chdir(self.ident)
         os.mkdir('output') # reasonable, don't change
+
+        if self.setuphook:
+            self.setuphook()
 
         # be careful if changing the queue size. Some jobs, such as the rdp screenshot,
         # create actual (offscreen) X11 windows that are then screenshot. Having more
@@ -87,9 +92,9 @@ class RdpScreenshot(ScraperJob):
         # run the rdp-screenshotter script with an offscreen window
         if type(domain) == str and type(user) == str and type(password) == str\
            and len(domain) > 0 and len(user) > 0:
-            self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
+            self.commandline = lambda scheme, target, port: "timeout 5 xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
         else:
-            self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s"%(target)
+            self.commandline = lambda scheme, target, port: "timeout 5 xvfb-run -a ../../RDP-screenshotter.sh %s"%(target)
         self.output_filename_pattern = '([0-9.]+)\.png'
     
 class VncScreenshot(ScraperJob):
@@ -100,9 +105,9 @@ class VncScreenshot(ScraperJob):
         self.port = port
         if type(domain) == str and type(user) == str and type(password) == str\
            and len(domain) > 0 and len(user) > 0:
-            self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s %s output/%s.png "%(target, port, password, target)
+            self.commandline = lambda scheme, target, port: "timeout 5 ../../scanners/vnc.py %s::%s %s output/%s.png "%(target, port, password, target)
         else:
-            self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s output/%s.png "%(target, port, target)
+            self.commandline = lambda scheme, target, port: "timeout 5 ../../scanners/vnc.py %s::%s output/%s.png "%(target, port, target)
             
         self.output_filename_pattern = '([0-9.]+)\.png'
         
@@ -118,7 +123,8 @@ class WebScreenshot(ScraperJob):
         self.path = 'results'
         self.scantype='webscreenshot'
         self.targets = targets
-        self.commandline = lambda scheme, target, port: "QT_QPA_PLATFORM=offscreen webscreenshot -r phantomjs %s://%s:%s >/dev/null 2>&1"%(scheme,target,port)
+        #self.commandline = lambda scheme, target, port: "QT_QPA_PLATFORM=offscreen webscreenshot -r phantomjs %s://%s:%s >/dev/null 2>&1"%(scheme,target,port)
+        self.commandline = lambda scheme, target, port: 'timeout 5 xvfb-run -a phantomjs --ignore-ssl-errors=true --ssl-protocol=any "/usr/local/lib/python3.8/dist-packages/webscreenshot/webscreenshot.js" url_capture=%s://%s:%s output_file="screenshots/http_%s_%s.png" width=1200 height=800 format=png quality=75 ajaxtimeout=1400 maxtimeout=1800'%(scheme, target, port, target, port)
         self.output_filename_pattern = '([a-z]+)_([0-9.]+)_([0-9]+).png'
 
     # overridden here because of the different path and different regex to match results files
