@@ -4,8 +4,7 @@ from scanners import Job
 from multiprocessing import Process, Queue
 import os, sys, re, json
 from os.path import join
-import collections, types
-from log import log
+import collections
 
 debug=True
 def d(m):
@@ -22,7 +21,7 @@ class ScraperJob(Job):
         self.path = 'results'
         self.scantype = 'scraper'
         # override
-        self.commandline = {} # add entry for each ip on init
+        self.commandline = lambda scheme, target, port: target
         self.output_filename_pattern = '([0-9.]+)\.png'
         self.port = '-1'
         self.scheme = ''
@@ -47,14 +46,7 @@ class ScraperJob(Job):
         processes = []
         def scrapetask(target):
             targetqueue.put(target)
-            c=None
-            if type(self.commandline) is types.LambdaType:
-                c=self.commandline(self.scheme, target, self.port)
-            elif type(self.commandline) is dict:
-                c=self.commandline[target]
-            else:
-                sys.stderr.write('Unknown commandline type')
-                return
+            c=self.commandline(self.scheme, target, self.port)
             d(c)
             os.system(c)
             targetqueue.get()
@@ -95,11 +87,9 @@ class RdpScreenshot(ScraperJob):
         # run the rdp-screenshotter script with an offscreen window
         if type(domain) == str and type(user) == str and type(password) == str\
            and len(domain) > 0 and len(user) > 0:
-            for target in targets:
-                self.commandline[target] = "xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
+            self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
         else:
-            for target in targets:
-                self.commandline[target] = "xvfb-run -a ../../RDP-screenshotter.sh %s"%(target)
+            self.commandline = lambda scheme, target, port: "xvfb-run -a ../../RDP-screenshotter.sh %s"%(target)
         self.output_filename_pattern = '([0-9.]+)\.png'
     
 class VncScreenshot(ScraperJob):
@@ -110,11 +100,9 @@ class VncScreenshot(ScraperJob):
         self.port = port
         if type(domain) == str and type(user) == str and type(password) == str\
            and len(domain) > 0 and len(user) > 0:
-            for target in targets:
-                self.commandline[target] = "../../scanners/vnc.py %s::%s %s output/%s.png "%(target, port, password, target)
+            self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s %s output/%s.png "%(target, port, password, target)
         else:
-            for target in targets:
-                self.commandline[target] = "../../scanners/vnc.py %s::%s output/%s.png "%(target, port, target)
+            self.commandline = lambda scheme, target, port: "../../scanners/vnc.py %s::%s output/%s.png "%(target, port, target)
             
         self.output_filename_pattern = '([0-9.]+)\.png'
         
@@ -130,8 +118,7 @@ class WebScreenshot(ScraperJob):
         self.path = 'results'
         self.scantype='webscreenshot'
         self.targets = targets
-        for target in targets:
-            self.commandline[target] = "QT_QPA_PLATFORM=offscreen webscreenshot -r phantomjs %s://%s:%s >/dev/null 2>&1"%(scheme,target,port)
+        self.commandline = lambda scheme, target, port: "QT_QPA_PLATFORM=offscreen webscreenshot -r phantomjs %s://%s:%s >/dev/null 2>&1"%(scheme,target,port)
         self.output_filename_pattern = '([a-z]+)_([0-9.]+)_([0-9]+).png'
 
     # overridden here because of the different path and different regex to match results files
@@ -162,18 +149,14 @@ class SmbEnum(ScraperJob):
         self.targets = targets
         self.port = '445'
         if type(domain) == str and type(user) == str and type(password) == str\
-           and len(domain) > 0 and len(user) > 0 and len(password) > 0:
-            for target in targets:
-                self.commandline[target] = "../../scanners/smbenum.sh -a %s %s %s %s"%(domain,user,password,target)
-                #self.commandline[target] = \
-                #"enum4linux -u '%s//%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
-                #    (domain,user,password, target, target, target)
+           and len(domain) > 0 and len(user) > 0:
+            self.commandline = lambda scheme, target, port:\
+                "enum4linux -u '%s\\%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
+                (domain,user,password, target, target, target)
         else:
-            for target in targets:
-                self.commandline[target] = "../../scanners/smbenum.sh %s"%target
-                #self.commandline[target] = \
-                #"enum4linux %s 2>output/err.%s | tee output/out.enum.%s"%\
-                #    (target, target, target)
+            self.commandline = lambda scheme, target, port:\
+                "enum4linux %s 2>output/err.%s | tee output/out.enum.%s"%\
+                (target, target, target)
         self.output_filename_pattern = 'out\.enum\.([0-9.]+)'
 
 
@@ -250,10 +233,9 @@ class Snmpwalk(ScraperJob):
         self.scantype='snmpwalk'
         self.targets = targets
         self.port = '161'
-        for target in targets:
-            self.commandline[target] = \
+        self.commandline = lambda scheme, target, port: \
             "snmpwalk -c public -v1 %s 2>output/err.%s | tee output/out.snmpwalk.%s"%\
-                (target, target, target)
+            (target, target, target)
         self.output_filename_pattern = 'out\.snmpwalk\.([0-9.]+)'
     
         
