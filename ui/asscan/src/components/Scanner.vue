@@ -1,9 +1,9 @@
 <template>
   <div>
     <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-      <div class="flex items-center justify-center">
+      <div class="">
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -15,7 +15,7 @@
         </div>
 
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -26,7 +26,7 @@
           />nmap
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -37,7 +37,7 @@
           />ffuf
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -48,7 +48,7 @@
           />snmpwalk
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -59,7 +59,7 @@
           />smb-enum
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -70,7 +70,7 @@
           />rdp
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -81,7 +81,18 @@
           />web
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
+        >
+          <input
+            type="checkbox"
+            name="scantype"
+            value="wappalyzer"
+            v-model="values.wappalyzer"
+            class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
+          />wappalyzer
+        </div>
+        <div
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -92,7 +103,7 @@
           />VNC
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -103,7 +114,7 @@
           />Bluekeep
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -114,7 +125,7 @@
           />MS17-010
         </div>
         <div
-          class="bg-blue-500 text-white py-2 px-2 m-2 rounded focus:outline-none focus:shadow-outline"
+          class="m-1 focus:outline-none focus:shadow-outline"
         >
           <input
             type="checkbox"
@@ -226,7 +237,7 @@
 
       <div class="mt-8 flex items-center justify-center">
         <button
-          class="bg-blue-500 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          class="py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           type="button"
           @click="submit()"
         >
@@ -284,6 +295,7 @@ export default {
         smbenum: false,
         rdp: false,
         web: false,
+        wappalyzer: false,
         vnc: false,
         bluekeep: false,
         ms17_010: false,
@@ -361,6 +373,10 @@ export default {
       if (this.values.web) {
         scantypes.push("webscreenshot");
         this.values.web = false;
+      }
+      if (this.values.wappalyzer) {
+        scantypes.push("wappalyzer");
+        this.values.wappalyzer = false;
       }
       if (this.values.rdp) {
         scantypes.push("rdpscreenshot");

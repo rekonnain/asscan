@@ -295,7 +295,10 @@ class Results:
     def by_port(self, port):
         return filter_by_port(self.hosts, port)
 
+    
 if __name__=='__main__':
     r = Results()
     r.read_all(sys.argv[1])
     print(json.dumps(r.hosts, indent=4, sort_keys=True))
+    foo={'a':1, 'b': 2, 'c': {'foo':'bar','asdfasdf':'kikkeli', 'xyz': { 'a':'b'}}, 'd': ['hihi','haha','hoho']}
+    print(dict2str(foo))

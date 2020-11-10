@@ -6,6 +6,7 @@ import os, sys, re, json
 from os.path import join
 import collections
 from log import log
+from helpers import dict2str
 
 debug=True
 def d(m):
@@ -379,4 +380,49 @@ class Ms12_020(ScraperJob):
                  'port': self.port }
         open('info.json','w').write(json.dumps(meta, indent=4,sort_keys=True))
         f.close()
+
+class Wappalyzer(ScraperJob):
+    def __init__(self, targets, scheme='http', port='80', processes=4):
+        super().__init__()
+        self.targets = targets
+        self.path = 'results'
+        self.scantype='wappalyzer'
+        self.targets = targets
+        self.scheme = scheme
+        self.port = port
+    
+    def scan(self):
+        os.chdir(self.path)
+        try:
+            os.mkdir(self.ident)
+        except:
+            pass
+        os.chdir(self.ident)
+        os.mkdir('output')
+
+        targetqueue = Queue(maxsize = 8)
+        commandline = "/bin/bash -c 'for x in %s ; do wappalyzer %s://$x:%s > output/$x ; done'"%\
+            (' '.join(self.targets), self.scheme, self.port)
+        log(commandline)
+        os.system(commandline)
+        self.postprocess()
+        sys.stderr.write("wappalyzer task done\n")
+
+    def postprocess(self):
+        results = []
+
+        for x in os.listdir('output'):
+            j = json.loads(open(os.path.join('output', x), 'r').read())
+            open(os.path.join('output', x+'.txt'),'w').write(dict2str(j))
+            results.append({'host': x, 'scantype': 'wappalyzer', 'file': os.path.join('output', x+'.txt'), 'port': self.port})
+
+        f = open('results.json','w')
+        f.write(json.dumps(results, indent=4, sort_keys=True))
+        meta = { 'scantype': 'wappalyzer',
+                 'jobid': self.ident,
+                 'target': self.targets,
+                 'port': self.port }
+        open('info.json','w').write(json.dumps(meta, indent=4,sort_keys=True))
+        f.close()
+        
         

@@ -391,6 +391,25 @@ def forkjobs(jobspec):
             hostkeys = list(hosts.keys())
             job = Ffuf(hostkeys, port=port)
             forkjob(job, scraperqueue)
+        elif typ == 'wappalyzer':
+            # Fetch results for target subnet, only screenshot those with open ports
+            port = jobspec['port'] if 'port' in jobspec else '80'
+            scheme = ''
+            if port == '443':
+                scheme = 'https'
+            else:
+                scheme = 'http'
+            r = Results()
+            r.read_all('results')
+            hosts = r.hosts
+            hosts = filter_by_network(hosts, target, mask)
+            if foundonly:
+                sys.stderr.write('0: %s\n'%str(list(hosts.keys())))
+                hosts = filter_by_port(hosts, port)
+                sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
+            hostkeys = list(hosts.keys())
+            job = Wappalyzer(hostkeys, port=port)
+            forkjob(job, scraperqueue)
         elif typ == 'bluekeep':
             # Fetch results for target subnet, only screenshot those with open ports
             port = '3389'

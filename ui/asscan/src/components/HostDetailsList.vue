@@ -95,6 +95,16 @@
           <FfufDetails :values="portvals" :baseurl="'http://'+results[0]['ipv4']+':'+portvals['port']"/>
         </div>
       </div>
+      <div v-else-if="result['scantype'].includes('wappalyzer')">
+        <div v-for="(portvals, port) in result['ports']" :key="port" class="object-fill">
+          <div class="flex">
+            <p class="underline"><a target="_blank" :href="'/api/'+portvals.file">Full data</a></p>
+          </div>
+          <div class="flex justify-center" style="height: 480px">
+          <iframe :src="'/api/'+portvals.file" class="object-fill" style="position: relative; height: 100%; width: 100%;" />
+          </div>
+        </div>
+      </div>
       <div v-if="result['scripts']">
         <KeyValueTable :values="result['scripts']"/>
       </div>
