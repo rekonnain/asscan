@@ -6,6 +6,10 @@ RUN pip3 install vncdotool; pip3 install webscreenshot
 RUN mkdir ass
 COPY install-phantomjs.sh ass/
 RUN cd ass; bash install-phantomjs.sh
+RUN apt-get -y install npm
+RUN npm -g config set user root
+RUN npm install -g npm
+RUN npm i --unsafe-perm -g wappalyzer
 RUN mkdir resources
 ADD common.py notes.py results.py scheduler.py server.py log.py reporting.py scanners.py scrapers.py autosslrdp.exp helpers.py ass/
 ADD RDP-screenshotter.sh ui ass/
