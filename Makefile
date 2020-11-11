@@ -13,5 +13,6 @@ kill:
 	sh -c 'docker rm -f $(docker ps -a -q)'
 
 run: stop build
+	mkdir -p results
 	docker-compose up
 
