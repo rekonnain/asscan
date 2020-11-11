@@ -9,7 +9,7 @@ import notes
 import ipaddress
 import os
 import re
-
+from log import log
 
 re_uuid = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z', re.I)
 
@@ -265,14 +265,17 @@ class Results:
                     fname = join(path, d, entry['file']) if 'file' in entry else ''
                     scantype = entry['scantype']
                     if scantype == 'ffuf':
+                        #host = host.split(':')[0] # ffuf writes host:port in the json
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'file': fname, 'results': entry['output']['results']}]}
-                    if scantype == 'bluekeep' or scantype == 'ms17_010':
+                    elif scantype == 'bluekeep' or scantype == 'ms17_010':
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'status': entry['status']}]}
                     elif fname == '' or os.stat(fname).st_size == 0:
+                        if host == '192.168.9.203':
+                            log('no file "%s"!! %s %s'%(fname, d, json.dumps(entry, indent=4)))
                         continue
                     else:
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'file': fname}]}
-                        
+
                     self.hosts[host].append(obj)
             elif isfile(join(path,d, 'output.xml')):
                 j = ScanJob()
