@@ -408,7 +408,7 @@ def forkjobs(jobspec):
                 hosts = filter_by_port(hosts, port)
                 sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
             hostkeys = list(hosts.keys())
-            job = Wappalyzer(hostkeys, port=port)
+            job = Wappalyzer(hostkeys, port=port, scheme=scheme)
             forkjob(job, scraperqueue)
         elif typ == 'bluekeep':
             # Fetch results for target subnet, only screenshot those with open ports
