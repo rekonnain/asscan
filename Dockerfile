@@ -10,6 +10,8 @@ RUN apt-get -y install npm
 RUN npm -g config set user root
 RUN npm install -g npm
 RUN npm i --unsafe-perm -g wappalyzer
+# wappalyzer depends on something, not sure what, it's a browser so let's solve it by brute force
+RUN apt-get -y install $(apt-cache depends chromium | grep Depends | sed "s/.*ends:\ //" | tr '\n' ' ')
 RUN mkdir resources
 ADD common.py notes.py results.py scheduler.py server.py log.py reporting.py scanners.py scrapers.py autosslrdp.exp helpers.py ass/
 ADD RDP-screenshotter.sh ui ass/
