@@ -362,7 +362,7 @@ def forkjobs(jobspec):
             listlist = split(hostkeys, n)
             jobids = []
             for l in listlist:
-                job = Enum4Linux(hostkeys, domain=domain, user=user, password=password)
+                job = SmbEnum(hostkeys, domain=domain, user=user, password=password)
                 forkjob(job, scraperqueue)
                 jobids.append(job.ident)
         elif typ == 'snmpwalk':
