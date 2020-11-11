@@ -193,7 +193,7 @@ class Ffuf(ScraperJob):
         targetqueue = Queue(maxsize = 8)
         processes = []
         def enumtask(target):
-            targetspec = scheme + '://'
+            targetspec = self.scheme + '://'
             targetspec += target
             if self.port:
                 targetspec += ':%s'%self.port
