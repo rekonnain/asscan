@@ -378,6 +378,7 @@ def forkjobs(jobspec):
             r.read_all('results')
             hosts = r.hosts
             hosts = filter_by_network(hosts, target, mask)
+            hosts = filter_by_port(hosts, '161')
             hostkeys = list(hosts.keys())
             if mask == '32':
                 hostkeys = [target]
