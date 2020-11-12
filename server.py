@@ -286,6 +286,8 @@ def forkjobs(jobspec):
             # Fetch results for target subnet, only screenshot those with open ports
             port = jobspec['port'] if 'port' in jobspec else '80'
             scheme = jobspec['scheme'] if 'scheme' in jobspec else 'http'
+            if port == '443':
+                scheme = 'https'
             r = Results()
             r.read_all('results')
             hosts = r.hosts
