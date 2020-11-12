@@ -188,7 +188,7 @@ class Masscan(ScanJob):
         sys.stderr.write("Masscan done on %s, jobid %s\n"%(self.target, self.ident))
         
 class Nmap(ScanJob):
-    def __init__(self, target, script=None, portspec=None, udp=False):
+    def __init__(self, target, script='vulners,default', portspec=None, udp=False):
         super().__init__()
         self.target = target
         self.script = script
@@ -208,6 +208,7 @@ class Nmap(ScanJob):
         if self.portspec:
             args.append('-p%s'%self.portspec)
         if type(self.target) == list:
+            args.append('-Pn') # don't ping if we know which hosts to scan
             args += self.target
         else:
             args.append(self.target)
@@ -219,14 +220,6 @@ class Nmap(ScanJob):
                  'target': self.target}
         open(os.path.join('results',self.ident,'info.json'),'w').write(json.dumps(meta, indent=4,sort_keys=True))
         sys.stderr.write("nmap done on %s, jobid %s\n"%(self.target, self.ident))
-
-class SmbVuln(ScanJob):
-    def __init__(self, target):
-        super().__init__()
-        self.target = target
-
-    def scan(self):
-        super().run(['nmap', '-T4', '-A', '-p139,445', '--script=smb*vuln*', '-oX', self.resultsfile, self.target])
 
 if __name__=='__main__':
     s=ScanJob()

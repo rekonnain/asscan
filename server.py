@@ -207,7 +207,7 @@ def forkjobs(jobspec):
         hostkeys = target.replace(' ','').split(',')
 
     massjobs = []
-        
+
     # When submitting multiple job types in the same request and masscan is one of
     # the scan types, we first want to perform the masscan and only after that, the
     # other scan types, because we implictly perform other scans only against already
@@ -282,10 +282,6 @@ def forkjobs(jobspec):
             prefix = jobspec['prefix'] if 'prefix' in jobspec else None
             job = Nmap(targetspec, udp=True)
             forkjob(job, nmapqueue)
-        elif typ == 'smbvuln': # check if this still works. OTOH ms17-010 has its own checker now
-            targetspec = target + '/' + mask
-            job = SmbVuln(targetspec)
-            forkjob(job, vulnqueue)
         elif typ == 'webscreenshot':
             # Fetch results for target subnet, only screenshot those with open ports
             port = jobspec['port'] if 'port' in jobspec else '80'
@@ -352,19 +348,27 @@ def forkjobs(jobspec):
             hosts = r.hosts
             hostkeys = []
             hosts = filter_by_network(hosts, target, mask)
-            print('filtered: %s'%str(hosts.keys()))
             if foundonly:
                 hosts = filter_by_port(hosts, '445') # should this be 139 or 445?
+            else:
+                log('smbenum should target found only hosts')
+                continue
+            print('filtered: %s'%str(hosts.keys()))
             hostkeys = list(hosts.keys())
             if mask == '32':
                 hostkeys = [target]
             n = 30
             listlist = split(hostkeys, n)
+            log('listlist: %s'%str(listlist))
+            log('hostkeys: %s'%str(hostkeys))
             jobids = []
             for l in listlist:
-                job = SmbEnum(hostkeys, domain=domain, user=user, password=password)
-                forkjob(job, scraperqueue)
-                jobids.append(job.ident)
+                enumjob = SmbEnum(hostkeys, domain=domain, user=user, password=password)
+                forkjob(enumjob, scraperqueue)
+                jobids.append(enumjob.ident)
+                nmapjob = Nmap(l, script='smb*vuln*')
+                forkjob(nmapjob, nmapqueue)
+                jobids.append(nmapjob.ident)
         elif typ == 'snmpwalk':
             # Fetch results for target subnet, only screenshot those with open ports
             prefix = jobspec['prefix'] if 'prefix' in jobspec else None

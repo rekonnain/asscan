@@ -270,8 +270,6 @@ class Results:
                     elif scantype == 'bluekeep' or scantype == 'ms17_010':
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'status': entry['status']}]}
                     elif fname == '' or os.stat(fname).st_size == 0:
-                        if host == '192.168.9.203':
-                            log('no file "%s"!! %s %s'%(fname, d, json.dumps(entry, indent=4)))
                         continue
                     else:
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'file': fname}]}

@@ -1,5 +1,5 @@
 FROM kalilinux/kali-rolling
-RUN apt-get update ; apt-get -y install metasploit-framework
+RUN apt-get update ; apt-get -y install metasploit-framework ; apt-get -y install enum4linux
 RUN apt-get -y install golang; go get github.com/ffuf/ffuf; cp /root/go/bin/ffuf /usr/local/bin
 RUN apt-get -y install python3-pip xvfb xdotool bc imagemagick python3-tornado masscan expect rdesktop
 RUN pip3 install vncdotool; pip3 install webscreenshot
