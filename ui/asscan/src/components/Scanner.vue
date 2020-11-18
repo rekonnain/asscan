@@ -2,9 +2,7 @@
   <div>
     <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
       <div class="">
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -14,9 +12,7 @@
           />masscan
         </div>
 
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -25,9 +21,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />nmap
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -36,9 +30,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />ffuf
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -47,9 +39,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />snmpwalk
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -58,9 +48,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />smb-enum
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -69,9 +57,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />rdp
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -80,9 +66,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />web
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -91,9 +75,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />wappalyzer
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -102,9 +84,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />VNC
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -113,9 +93,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />Bluekeep
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -124,9 +102,7 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />MS17-010
         </div>
-        <div
-          class="m-1 focus:outline-none focus:shadow-outline"
-        >
+        <div class="m-1 focus:outline-none focus:shadow-outline">
           <input
             type="checkbox"
             name="scantype"
@@ -275,7 +251,7 @@ import axios from "axios";
 export default {
   name: "Scanner",
   props: {
-    scanlist: []
+    scanlist: [],
   },
   data() {
     return {
@@ -300,8 +276,8 @@ export default {
         bluekeep: false,
         ms17_010: false,
         ms12_020: false,
-        onlyfound: false
-      }
+        onlyfound: false,
+      },
     };
   },
   mounted() {
@@ -325,8 +301,8 @@ export default {
 
     requestscan(scandescription) {
       let url = "/api/jobs/";
-      console.log('scan description:')
-      console.log(scandescription)
+      console.log("scan description:");
+      console.log(scandescription);
       axios.post(url, scandescription);
     },
     submit() {
@@ -412,10 +388,19 @@ export default {
       }
 
       payload.scantypes = scantypes;
-      payload.onlyfound = this.values.onlyfound
+      payload.onlyfound = this.values.onlyfound;
 
-      this.requestscan(payload)
-    }
-  }
+      if (this.values.port.length > 0) {
+        const that = this;
+        this.values.port.split(",").forEach(function(port) {
+          payload.port = port;
+          console.log(payload);
+          that.requestscan(payload);
+        });
+      } else {
+        this.requestscan(payload);
+      }
+    },
+  },
 };
 </script>

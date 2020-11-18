@@ -31,6 +31,7 @@
 
     <div class="m-2 p-2 bg-gray-400" v-for="result in results" :key="result['ipv4']">
       <p v-if="result['scantype']">Scan type: {{result['scantype']}}</p>
+      <p v-if="result['port']">Port: {{result['port']}}</p>
       <p v-if="result['cmdline']">Scanner args: <pre class="text-xs">{{result['cmdline']}}</pre></p>
       <p v-if="result['scantime']">Scan time: {{result['scantime']}}</p>
       <p v-if="result['jobid']">Job ID: {{result['jobid']}}</p>
