@@ -14,7 +14,7 @@ RUN npm i --unsafe-perm -g wappalyzer
 RUN apt-get -y install $(apt-cache depends chromium | grep Depends | sed "s/.*ends:\ //" | tr '\n' ' ')
 RUN mkdir resources
 ADD common.py notes.py results.py scheduler.py server.py log.py reporting.py scanners.py scrapers.py autosslrdp.exp helpers.py ass/
-ADD RDP-screenshotter.sh ui ass/
+ADD RDP-screenshotter.sh ass/
 ADD resources/quickhits.txt ass/resources/
 ADD ui /ass/ui
 ADD scanners /ass/scanners
