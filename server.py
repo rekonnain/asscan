@@ -340,7 +340,7 @@ def forkjobs(jobspec):
             listlist = split(hostkeys, n)
             jobids = []
             for l in listlist:
-                job = VncScreenshot(hostkeys, port=port, password=vncpassword)
+                job = VncScreenshot(l, port=port, password=vncpassword)
                 forkjob(job, scraperqueue)
                 jobids.append(job.ident)
         elif typ == 'smbenum':
@@ -365,7 +365,7 @@ def forkjobs(jobspec):
             log('hostkeys: %s'%str(hostkeys))
             jobids = []
             for l in listlist:
-                enumjob = SmbEnum(hostkeys, domain=domain, user=user, password=password)
+                enumjob = SmbEnum(l, domain=domain, user=user, password=password)
                 forkjob(enumjob, scraperqueue)
                 jobids.append(enumjob.ident)
                 nmapjob = Nmap(l, script='smb*vuln*')
