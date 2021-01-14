@@ -30,6 +30,6 @@ if { $user eq "" && $domain eq "" && $password eq "" } {
     expect "Do you trust the above certificate? (Y/T/N) "
     send -- "Y\r"
     expect "*\n"
-    sleep 4
+    sleep 15
     expect eof
 }

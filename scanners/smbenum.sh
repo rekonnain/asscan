@@ -25,7 +25,7 @@ for target in $targets;do
     outfn=output/out.enum.$target
     #enum4linux
     if [ -n "$domain" ] && [ -n "$user" ] && [ -n "$pass" ] ; then
-	enum4linux -w $domain -u $domain//$user -p $pass $target -a -r 2>/dev/null | tee $outfn
+	enum4linux -w $domain -u $domain\\$user -p $pass $target -a -r 2>/dev/null | tee $outfn
     else
 	enum4linux $target -a -r 2>/dev/null | tee $outfn
     fi

@@ -75,11 +75,16 @@ echo -e "${blue} Initiating funny rdesktop connection to ${host}"
 #rdesktop -u "" -a 16 $host &
 ../../autosslrdp.exp $host $domain $user $password &
 pid=$!
+sleep 2
+kill $pid # freerdp times out on first attempt, is fine on second attempt??!!
+../../autosslrdp.exp $host $domain $user $password &
+pid=$!
+
 
 # Get window id
 window=
 timer=0
-    while true; do
+while true; do
     # Check to see if we timed out
     isTimedOut $(printf "%.0f" $timer)
 

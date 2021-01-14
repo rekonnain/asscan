@@ -93,9 +93,9 @@ class RdpScreenshot(ScraperJob):
         # run the rdp-screenshotter script with an offscreen window
         if type(domain) == str and type(user) == str and type(password) == str\
            and len(domain) > 0 and len(user) > 0:
-            self.commandline = lambda scheme, target, port: "timeout 5 xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
+            self.commandline = lambda scheme, target, port: "timeout 15 xvfb-run -a ../../RDP-screenshotter.sh %s '%s' '%s' '%s'"%(target, domain, user, password)
         else:
-            self.commandline = lambda scheme, target, port: "timeout 5 xvfb-run -a ../../RDP-screenshotter.sh %s"%(target)
+            self.commandline = lambda scheme, target, port: "timeout 15 xvfb-run -a ../../RDP-screenshotter.sh %s"%(target)
         self.output_filename_pattern = '([0-9.]+)\.png'
     
 class VncScreenshot(ScraperJob):
@@ -158,12 +158,12 @@ class SmbEnum(ScraperJob):
         if type(domain) == str and type(user) == str and type(password) == str\
            and len(domain) > 0 and len(user) > 0:
             self.commandline = lambda scheme, target, port:\
-                "enum4linux -u '%s\\%s' -p '%s' %s 2>output/err.%s | tee output/out.enum.%s"%\
-                (domain,user,password, target, target, target)
+                "../../scanners/smbenum.sh -a %s %s %s %s"%\
+                (domain,user,password, target)
         else:
             self.commandline = lambda scheme, target, port:\
-                "enum4linux %s 2>output/err.%s | tee output/out.enum.%s"%\
-                (target, target, target)
+                "../../scanners/smbenum.sh %s"%\
+                (target)
         self.output_filename_pattern = 'out\.enum\.([0-9.]+)'
 
 
