@@ -149,17 +149,18 @@ class WebScreenshot(ScraperJob):
 
             
 class SmbEnum(ScraperJob):
-    def __init__(self, targets, processes=4, domain=None, user=None, password=None):
+    def __init__(self, targets, processes=4, domain=None, user=None, password=None, dchost=None):
         super().__init__(targets)
         self.path = 'results'
         self.scantype='smbenum'
         self.targets = targets
         self.port = '445'
-        if type(domain) == str and type(user) == str and type(password) == str\
-           and len(domain) > 0 and len(user) > 0:
+        self.dchost = dchost
+        if type(domain) == str and type(user) == str and type(password) == str and type(dchost) == str\
+           and len(domain) > 0 and len(user) > 0 and len(dchost) > 0:
             self.commandline = lambda scheme, target, port:\
-                "../../scanners/smbenum.sh -a %s %s %s %s"%\
-                (domain,user,password, target)
+                "../../scanners/smbenum.sh -a %s %s %s %s %s"%\
+                (domain,user,password, dchost, target)
         else:
             self.commandline = lambda scheme, target, port:\
                 "../../scanners/smbenum.sh %s"%\

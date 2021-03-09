@@ -347,6 +347,8 @@ def forkjobs(jobspec):
             # Fetch results for target subnet, only screenshot those with open ports
             r = Results()
             r.read_all('results')
+            dchost = jobspec['dchost'] if 'dchost' in jobspec else None
+            print("DCHOST %s"%dchost)
             hosts = r.hosts
             hostkeys = []
             hosts = filter_by_network(hosts, target, mask)
@@ -365,7 +367,7 @@ def forkjobs(jobspec):
             log('hostkeys: %s'%str(hostkeys))
             jobids = []
             for l in listlist:
-                enumjob = SmbEnum(l, domain=domain, user=user, password=password)
+                enumjob = SmbEnum(l, domain=domain, user=user, password=password, dchost=dchost)
                 forkjob(enumjob, scraperqueue)
                 jobids.append(enumjob.ident)
                 nmapjob = Nmap(l, script='smb*vuln*')

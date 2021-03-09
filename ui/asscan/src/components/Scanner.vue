@@ -201,6 +201,25 @@
         />
       </div>
 
+
+
+      <div class="mt-4 flex items-center justify-between">
+        <label class="block text-gray-700 w-2/5 text-sm" for="dchost"
+          >Domain Controller address</label
+        >
+      </div>
+      <div class="flex items-center justify-between">
+        <input
+          class="shadow appearance-none border rounded w-2/5 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="target"
+          type="text"
+          v-model="values.dchost"
+          placeholder="dc01.corp.com"
+        />
+      </div>
+
+
+
       <div class="mt-8 flex items-center justify-center">
         <input
           type="checkbox"
@@ -264,6 +283,7 @@ export default {
         domain: "",
         username: "",
         password: "",
+        dchost: "",
         masscan: false,
         nmap: false,
         ffuf: false,
@@ -333,6 +353,9 @@ export default {
       }
       if (this.values.password.length > 0) {
         payload.password = this.values.password;
+      }
+      if (this.values.dchost.length > 0) {
+        payload.dchost = this.values.dchost;
       }
 
       let scantypes = [];
