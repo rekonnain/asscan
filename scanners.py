@@ -130,7 +130,7 @@ class ScanJob(Job):
                     except:
                         pass
                     if 'state' in pdict:
-                        if dict['state'] == 'open':
+                        if pdict['state'] == 'open':
                             host['ports'].append(pdict)
                     else:
                         host['ports'].append(pdict)
