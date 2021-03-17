@@ -168,10 +168,8 @@ def latest_only(res):
         t = x['scantype']
         if t in bytype:
             if x['timestamp'] > bytype[t]['timestamp']:
-                log('++ %s: %f > %f'%(t,x['timestamp'], bytype[t]['timestamp']))
                 bytype[t] = x
         else:
-            log('== %s: %f'%(t,x['timestamp']))
             bytype[t] = x
     return list(bytype.values())
 #print(json.dumps(res, indent=True, sort_keys=True))
