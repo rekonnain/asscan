@@ -129,7 +129,11 @@ class ScanJob(Job):
                         pdict.update(scripts)
                     except:
                         pass
-                    host['ports'].append(pdict)
+                    if 'state' in pdict:
+                        if dict['state'] != 'open':
+                            host['ports'].append(pdict)
+                    else:
+                        host['ports'].append(pdict)
             host['osmatches'] = []
             host['jobid'] = self.ident
             host['scantype'] = root.attrib['scanner']
