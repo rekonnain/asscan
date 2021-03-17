@@ -11,7 +11,8 @@ if [ $1 == '-a' ] ; then
     domain=$1
     user=$2
     pass=$3
-    shift 3
+    dchost=$4
+    shift 4
     targets=$*
 else
     domain=''
@@ -31,9 +32,14 @@ for target in $targets;do
     fi
 
     # smbmap
-    if [ -n "$domain" ] && [ -n "$user" ] && [ -n "$pass" ] ; then
+    if [ -n "$domain" ] && [ -n "$user" ] && [ -n "$pass" ] && [ -n "$dchost" ] ; then
 	fn=output/out.smbmap.$target
-	smbmap -H $target -u $user -d $domain -p $pass | tee $fn
+	# smbmap -H $target -u $user -d $domain -p $pass | tee $fn
+	if [ -n "$dchost" ] ; then
+	    cme smb -u $user -d $domain -p $pass --kdcHost $dchost --shares --sessions --loggedon-users --pass-pol --sam $target | tee $fn
+	else
+	    smbmap -H $target -u $user -d $domain -p $pass | tee $fn
+	fi
 	# copy to the output file
 	cat $fn >> $outfn
 	disks=`grep -A 10000 Disk $fn |grep -v Disk|grep -v -- ----|awk '{print $1}'`

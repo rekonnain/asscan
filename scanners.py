@@ -58,6 +58,7 @@ class ScanJob(Job):
     def load_file(self, filename):
         self.resultsfile = filename
         self.ident = self.resultsfile.split('/')[1].split('.')[0]
+        self.timestamp = os.stat(self.resultsfile).st_ctime
         self.parse_nmap()
     
     def __init__(self):
@@ -140,6 +141,7 @@ class ScanJob(Job):
                     host['osmatches'].append({'name': osmatch.attrib['name'],
                                               'accuracy': osmatch.attrib['accuracy']})
             key = host['ipv4']
+            host['timestamp'] = self.timestamp
             # script scans
             hostscriptnode = hostNode.find('hostscript')
             if hostscriptnode:
