@@ -83,7 +83,7 @@ class ResultsHandler(tornado.web.RequestHandler):
             r.read_all('results')
             result = {}
             if ip in r.hosts.keys():
-                self.write({ip: r.hosts[ip]})
+                self.write({ip: latest_only(r.hosts[ip])})
             else:
                 self.write({})
         elif args[0] == 'port':

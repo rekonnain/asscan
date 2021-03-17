@@ -162,12 +162,26 @@ def get_results(args, filters={}):
     else:
         return {"status": "not ok"} # what
 
+def latest_only(res):
+    bytype = {}
+    for x in res:
+        t = x['scantype']
+        if t in bytype:
+            if x['timestamp'] > bytype[t]['timestamp']:
+                log('++ %s: %f > %f'%(t,x['timestamp'], bytype[t]['timestamp']))
+                bytype[t] = x
+        else:
+            log('== %s: %f'%(t,x['timestamp']))
+            bytype[t] = x
+    return list(bytype.values())
+#print(json.dumps(res, indent=True, sort_keys=True))
+    
 def get_results_for_ip(ip):
     r = Results()
     r.read_all('results')
     result = {}
     if ip in r.hosts.keys():
-        return {ip: r.hosts[ip]}
+        return {ip: latest_only(r.hosts[ip])}
     else:
         return {}
 
@@ -246,7 +260,7 @@ class Results:
     # as [uuid].xml
     # everything else should be either [uuid]/output.xml for nmap/masscan
     # and [uuid]/results.json for all other types
-    def read_all(self, path):
+    def read_all(self, path, latest_only = False):
         files = [x for x in listdir(path) if isfile(join(path, x)) and x.endswith('.xml')]
         directories = [x for x in listdir(path) if isdir(join(path, x))]
         for f in files:
@@ -256,6 +270,7 @@ class Results:
                 #print(h)
                 self.hosts[key].append(j.hosts[key])
         for d in directories:
+            timestamp = os.stat(join(path, d)).st_ctime
             rfile = join(path, d, 'results.json')
             if isfile(rfile):
                 r = json.loads(open(rfile,'r').read())
@@ -273,7 +288,7 @@ class Results:
                         continue
                     else:
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'file': fname}]}
-
+                    obj['timestamp'] = timestamp
                     self.hosts[host].append(obj)
             elif isfile(join(path,d, 'output.xml')):
                 j = ScanJob()
