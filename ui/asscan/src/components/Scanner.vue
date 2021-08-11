@@ -7,6 +7,7 @@
             type="checkbox"
             name="scantype"
             value="masscan"
+          v-on:change="changeHandler"
             v-model="values.masscan"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />masscan
@@ -17,6 +18,7 @@
             type="checkbox"
             name="scantype"
             value="nmap"
+          v-on:change="changeHandler"
             v-model="values.nmap"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />nmap
@@ -26,6 +28,7 @@
             type="checkbox"
             name="scantype"
             value="ffuf"
+          v-on:change="changeHandler"
             v-model="values.ffuf"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />ffuf
@@ -35,6 +38,7 @@
             type="checkbox"
             name="scantype"
             value="snmpwalk"
+          v-on:change="changeHandler"
             v-model="values.snmp"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />snmpwalk
@@ -44,6 +48,7 @@
             type="checkbox"
             name="scantype"
             value="smbenum"
+          v-on:change="changeHandler"
             v-model="values.smbenum"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />smb-enum
@@ -53,6 +58,7 @@
             type="checkbox"
             name="scantype"
             value="rdpscreenshot"
+          v-on:change="changeHandler"
             v-model="values.rdp"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />rdp
@@ -62,6 +68,7 @@
             type="checkbox"
             name="scantype"
             value="webscreenshot"
+          v-on:change="changeHandler"
             v-model="values.web"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />web
@@ -71,6 +78,7 @@
             type="checkbox"
             name="scantype"
             value="wappalyzer"
+          v-on:change="changeHandler"
             v-model="values.wappalyzer"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />wappalyzer
@@ -81,6 +89,7 @@
             name="scantype"
             value="vncscreenshot"
             v-model="values.vnc"
+          v-on:change="changeHandler"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />VNC
         </div>
@@ -90,6 +99,7 @@
             name="scantype"
             value="bluekeep"
             v-model="values.bluekeep"
+          v-on:change="changeHandler"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />Bluekeep
         </div>
@@ -98,6 +108,7 @@
             type="checkbox"
             name="scantype"
             value="ms17_010"
+          v-on:change="changeHandler"
             v-model="values.ms17_010"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />MS17-010
@@ -108,6 +119,7 @@
             name="scantype"
             value="ms12_020"
             v-model="values.ms12_020"
+          v-on:change="changeHandler"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />MS12-020
         </div>
@@ -131,12 +143,14 @@
           id="target"
           type="text"
           v-model="values.target"
+          v-on:input="changeHandler"
           placeholder="192.168.1.1"
         />
         <input
           class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="netmask"
           type="text"
+          v-on:input="changeHandler"
           v-model="values.netmask"
           placeholder="16"
         />
@@ -144,6 +158,7 @@
           class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="port"
           type="text"
+          v-on:input="changeHandler"
           v-model="values.splitmask"
           placeholder="24"
         />
@@ -151,6 +166,7 @@
           class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="port"
           type="text"
+          v-on:input="changeHandler"
           v-model="values.port"
           placeholder="80"
         />
@@ -176,6 +192,7 @@
           id="target"
           type="text"
           v-model="values.vncpassword"
+          v-on:input="changeHandler"
           placeholder="hunter2 :D"
         />
         <input
@@ -183,20 +200,23 @@
           id="netmask"
           type="text"
           v-model="values.domain"
+          v-on:input="changeHandler"
           placeholder="MEGACORP"
         />
         <input
           class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="port"
+          id="username"
           type="text"
           v-model="values.username"
+          v-on:input="changeHandler"
           placeholder="Administrator"
         />
         <input
           class="shadow appearance-none border rounded w-1/5 mx-2 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="port"
+          id="password"
           type="text"
           v-model="values.password"
+          v-on:input="changeHandler"
           placeholder="makkara"
         />
       </div>
@@ -214,6 +234,7 @@
           id="target"
           type="text"
           v-model="values.dchost"
+          v-on:input="changeHandler"
           placeholder="dc01.corp.com"
         />
       </div>
@@ -226,6 +247,7 @@
           name="scantype"
           value="smbenum"
           v-model="values.onlyfound"
+          v-on:input="changeHandler"
           class="mr-2 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
         />Only scan discovered hosts
       </div>
@@ -240,6 +262,11 @@
         </button>
       </div>
     </form>
+
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <code>{{values.curlcmdline}}</code>
+    </div>
+
     <div v-if="scanlist.length > 0">
       <p>Nmap & masscan done so far:</p>
       <table class="table-auto">
@@ -325,12 +352,32 @@ export default {
       console.log(scandescription);
       axios.post(url, scandescription);
     },
-    submit() {
-      if (this.values.target.length == 0) {
-        alert("target field is empty, idiot");
-        return;
-      }
-      let payload = {};
+
+    changeHandler(evt) {
+      console.log('pylly');
+        const that = this;
+        console.log(this.createpayload());
+        var cmdline = 'curl -H "Content-Type: application/json" -d \'' + JSON.stringify(this.createpayload()).replace('",', '", ') + '\' ' +  location.protocol + '//' + location.host + '/jobs/'
+        this.values.curlcmdline = cmdline;
+      },
+
+    clearValues() {
+        this.values.masscan = false;
+        this.values.nmap = false;
+        this.values.web = false;
+        this.values.wappalyzer = false;
+        this.values.rdp = false;
+        this.values.vnc = false;
+        this.values.snmp = false;
+        this.values.smbenum = false;
+        this.values.ffuf = false;
+        this.values.bluekeep = false;
+        this.values.ms17_010 = false;
+        this.values.ms12_020 = false;
+    },
+
+    createpayload() {
+      var payload = {};
       const netmask =
         this.values.netmask.length > 0 ? this.values.netmask : "32";
 
@@ -363,65 +410,67 @@ export default {
       // curl -X POST 'http://localhost:8888/jobs/?prefix=10.20.20.85&type=snmpwalk'
       if (this.values.masscan) {
         scantypes.push("masscan");
-        this.values.masscan = false;
       }
       if (this.values.nmap) {
         scantypes.push("nmap");
-        this.values.nmap = false;
       }
       if (this.values.web) {
         scantypes.push("webscreenshot");
-        this.values.web = false;
       }
       if (this.values.wappalyzer) {
         scantypes.push("wappalyzer");
-        this.values.wappalyzer = false;
       }
       if (this.values.rdp) {
         scantypes.push("rdpscreenshot");
-        this.values.rdp = false;
       }
       if (this.values.vnc) {
         scantypes.push("vncscreenshot");
-        this.values.vnc = false;
       }
       if (this.values.snmp) {
         scantypes.push("snmpwalk");
-        this.values.snmp = false;
       }
       if (this.values.smbenum) {
         scantypes.push("smbenum");
-        this.values.smbenum = false;
       }
       if (this.values.ffuf) {
         scantypes.push("ffuf");
-        this.values.ffuf = false;
       }
       if (this.values.bluekeep) {
         scantypes.push("bluekeep");
-        this.values.bluekeep = false;
       }
       if (this.values.ms17_010) {
         scantypes.push("ms17_010");
-        this.values.ms17_010 = false;
       }
       if (this.values.ms12_020) {
         scantypes.push("ms12_020");
-        this.values.ms12_020 = false;
       }
+
+
+
+
 
       payload.scantypes = scantypes;
       payload.onlyfound = this.values.onlyfound;
 
+      return payload;
+      },
+
+    submit() {
+      if (this.values.target.length == 0) {
+        alert("target field is empty, idiot");
+        return;
+      }
+
       if (this.values.port.length > 0) {
         const that = this;
         this.values.port.split(",").forEach(function(port) {
+          const payload = that.createpayload();
           payload.port = port;
           console.log(payload);
           that.requestscan(payload);
         });
       } else {
-        this.requestscan(payload);
+        this.requestscan(this.createpayload());
       }
     },
   },
