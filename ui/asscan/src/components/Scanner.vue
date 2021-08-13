@@ -223,15 +223,15 @@
 
 
 
-      <div class="mt-4 flex items-center justify-between">
-        <label class="block text-gray-700 w-2/5 text-sm" for="dchost"
+      <div class="mt-4 flex items-center">
+        <label class="block text-gray-700 w-2/5 mx-2 px-1 text-sm" for="dchost"
           >Domain Controller address</label>
-        <label class="block text-gray-700 w-1/5 text-sm" for="masscanbitrate"
+        <label class="block text-gray-700 w-1/5 mx-2 px-1 text-sm" for="masscanbitrate"
           >Masscan bitrate</label>
       </div>
-      <div class="flex items-center justify-between">
+      <div class="flex items-center">
         <input
-          class="shadow appearance-none border rounded w-2/5 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          class="shadow appearance-none border rounded w-2/5 py-2 mx-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="dchost"
           type="text"
           v-model="values.dchost"
@@ -239,7 +239,7 @@
           placeholder="dc01.corp.com"
         />
         <input
-          class="shadow appearance-none border rounded w-2/5 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          class="shadow appearance-none border rounded w-1/5 py-2 mx-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="masscanbitrate"
           type="text"
           v-model="values.masscanbitrate"
