@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from os import listdir
+from os import listdir, stat
+from datetime import datetime, timezone
 from os.path import join, isfile, isdir
 import json, sys
 from scanners import ScanJob
@@ -111,9 +112,8 @@ def match_leaf(d, content):
     if not dict in map(type, d.values()) and not list in map(type, d.values()):
         tip = False
     for key, val in d.items():
-        if type(val) == str:
-            if content.lower() in val.lower():
-                return True
+        if type(val) == str and content.lower() in val.lower():
+            return True
         if not tip and content.lower() in key.lower():
             return True
         if type(val) == dict:
@@ -177,7 +177,6 @@ def latest_only(res):
 def get_results_for_ip(ip):
     r = Results()
     r.read_all('results')
-    result = {}
     if ip in r.hosts.keys():
         return {ip: latest_only(r.hosts[ip])}
     else:
@@ -278,7 +277,6 @@ class Results:
                     fname = join(path, d, entry['file']) if 'file' in entry else ''
                     scantype = entry['scantype']
                     if scantype == 'ffuf':
-                        #host = host.split(':')[0] # ffuf writes host:port in the json
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'file': fname, 'results': entry['output']['results']}]}
                     elif scantype == 'bluekeep' or scantype == 'ms17_010':
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'status': entry['status']}]}
@@ -296,6 +294,8 @@ class Results:
             infoname = join(path, d, 'info.json')
             if isfile(infoname):
                 info = json.loads(open(infoname, 'r').read())
+                ts = datetime.fromtimestamp(stat(infoname).st_mtime, tz=timezone.utc)
+                info['timestamp'] = str(ts)
                 if info['scantype'] in ['nmap', 'masscan']:
                     try:
                         net = ipaddress.ip_network(info['target']) #just check if it's valid

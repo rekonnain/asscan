@@ -41,7 +41,7 @@
         Open ports:
         <b class="pl-2" v-for="x in result['ports']" :key="x">
           <span v-if="createurl(results[0]['ipv4'], x['port']).length > 0">
-            <a class="underline" target="_blank" :href="createurl(results[0]['ipv4'], x['port'])">{{x['port']}}</a>
+            <a class="underline" target="_blank" rel="noopener" :href="createurl(results[0]['ipv4'], x['port'])">{{x['port']}}</a>
           </span>
           <span v-else>
           {{x['port']}}
