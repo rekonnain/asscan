@@ -108,7 +108,7 @@
             type="checkbox"
             name="scantype"
             value="ms17_010"
-          v-on:change="changeHandler"
+            v-on:change="changeHandler"
             v-model="values.ms17_010"
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />MS17-010
@@ -225,17 +225,26 @@
 
       <div class="mt-4 flex items-center justify-between">
         <label class="block text-gray-700 w-2/5 text-sm" for="dchost"
-          >Domain Controller address</label
-        >
+          >Domain Controller address</label>
+        <label class="block text-gray-700 w-1/5 text-sm" for="masscanbitrate"
+          >Masscan bitrate</label>
       </div>
       <div class="flex items-center justify-between">
         <input
           class="shadow appearance-none border rounded w-2/5 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="target"
+          id="dchost"
           type="text"
           v-model="values.dchost"
           v-on:input="changeHandler"
           placeholder="dc01.corp.com"
+        />
+        <input
+          class="shadow appearance-none border rounded w-2/5 py-2 px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="masscanbitrate"
+          type="text"
+          v-model="values.masscanbitrate"
+          v-on:input="changeHandler"
+          placeholder="20000"
         />
       </div>
 
@@ -277,6 +286,7 @@
         >
           <td class="p-2">{{ scan["scantype"] }}</td>
           <td class="p-2">{{ scan["target"] }}</td>
+          <td class="p-2">{{ scan["timestamp"] }}</td>
         </tr>
       </table>
     </div>
@@ -354,7 +364,6 @@ export default {
     },
 
     changeHandler(evt) {
-      console.log('pylly');
         const that = this;
         console.log(this.createpayload());
         var cmdline = 'curl -H "Content-Type: application/json" -d \'' + JSON.stringify(this.createpayload()).replace('",', '", ') + '\' ' +  location.protocol + '//' + location.host + '/jobs/'

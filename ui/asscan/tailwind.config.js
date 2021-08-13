@@ -2,6 +2,9 @@ module.exports = {
   theme: {
     extend: {}
   },
+  purge: [
+    './src/**/*.vue',
+  ],  
   variants: {
     backgroundColor: ['responsive', 'hover', 'focus', 'even', 'odd'],
   },
