@@ -255,8 +255,8 @@
           type="checkbox"
           name="scantype"
           value="smbenum"
+          v-on:change="changeHandler"
           v-model="values.onlyfound"
-          v-on:input="changeHandler"
           class="mr-2 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
         />Only scan discovered hosts
       </div>
