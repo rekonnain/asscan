@@ -25,6 +25,7 @@ class ScraperJob(Job):
         # override
         self.commandline = lambda scheme, target, port: target
         self.setuphook = None # set to an argumentless lambda if necessary
+        self.posthook = None
         self.output_filename_pattern = '([0-9.]+)\.png'
         self.port = '-1'
         self.scheme = ''
@@ -55,6 +56,8 @@ class ScraperJob(Job):
             c=self.commandline(self.scheme, target, self.port)
             d(c)
             os.system(c)
+            if self.posthook:
+                self.posthook()
             targetqueue.get()
         for t in self.targets:
             p = Process(target = lambda: scrapetask(t))
@@ -149,18 +152,17 @@ class WebScreenshot(ScraperJob):
 
             
 class SmbEnum(ScraperJob):
-    def __init__(self, targets, processes=4, domain=None, user=None, password=None, dchost=None):
+    def __init__(self, targets, processes=4, domain=None, user=None, password=None):
         super().__init__(targets)
         self.path = 'results'
         self.scantype='smbenum'
         self.targets = targets
         self.port = '445'
-        self.dchost = dchost
-        if type(domain) == str and type(user) == str and type(password) == str and type(dchost) == str\
-           and len(domain) > 0 and len(user) > 0 and len(dchost) > 0:
+        if type(domain) == str and type(user) == str and type(password) == str\
+           and len(domain) > 0 and len(user) > 0:
             self.commandline = lambda scheme, target, port:\
-                "../../scanners/smbenum.sh -a %s %s %s %s %s"%\
-                (domain,user,password, dchost, target)
+                "../../scanners/smbenum.sh -a %s %s %s %s"%\
+                (domain,user,password, target)
         else:
             self.commandline = lambda scheme, target, port:\
                 "../../scanners/smbenum.sh %s"%\
