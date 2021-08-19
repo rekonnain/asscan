@@ -73,13 +73,19 @@ function ocr {
 # Launch rdesktop in the background
 echo -e "${blue} Initiating funny rdesktop connection to ${host}"
 #rdesktop -u "" -a 16 $host &
-../../autosslrdp.exp $host $domain $user $password &
-pid=$!
-sleep 2
-kill $pid # freerdp times out on first attempt, is fine on second attempt??!!
-../../autosslrdp.exp $host $domain $user $password &
-pid=$!
-
+if [ -z "$password" ] ; then
+    ../../autosslrdp.exp $host $domain $user $password &
+    pid=$!
+    sleep 2
+    kill $pid # freerdp times out on first attempt, is fine on second attempt??!!
+    ../../autosslrdp.exp $host $domain $user $password &
+    pid=$!
+else
+    xfreerdp /u:$user /d:$domain /p:$password /v:$host /cert:ignore &
+    pid=$!
+    sleep 7
+fi
+    
 
 # Get window id
 window=

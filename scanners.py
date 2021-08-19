@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from subprocess import *
+import subprocess
 import uuid
 import sys
 import json
@@ -25,7 +25,7 @@ class Job:
         sys.stderr.write("Starting job: %s\n"%' '.join(argv))
         print(str(argv))
         self.cmdline = ' '.join(argv)
-        p = Popen(argv, stdout=PIPE, stderr=PIPE)
+        p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.state = 'running'
         self.err = p.stderr.read()
         self.output = p.stdout.read()

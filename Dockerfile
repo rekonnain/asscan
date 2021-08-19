@@ -13,6 +13,9 @@ RUN npm i --unsafe-perm -g wappalyzer
 # wappalyzer depends on something, not sure what, it's a browser so let's solve it by brute force
 RUN apt-get -y install $(apt-cache depends chromium | grep Depends | sed "s/.*ends:\ //" | tr '\n' ' ')
 RUN apt-get -y install freerdp2-x11 smbmap
+RUN apt-get -y install python3-venv; python3 -m pip install pipx
+RUN pipx ensurepath
+RUN pipx install crackmapexec
 RUN mkdir resources
 ADD common.py notes.py results.py scheduler.py server.py log.py reporting.py scanners.py scrapers.py autosslrdp.exp helpers.py ass/
 ADD RDP-screenshotter.sh ass/

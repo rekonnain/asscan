@@ -11,8 +11,7 @@ if [ $1 == '-a' ] ; then
     domain=$1
     user=$2
     pass=$3
-    dchost=$4
-    shift 4
+    shift 3
     targets=$*
 else
     domain=''
@@ -26,25 +25,28 @@ for target in $targets;do
     outfn=output/out.enum.$target
     #enum4linux
     if [ -n "$domain" ] && [ -n "$user" ] && [ -n "$pass" ] ; then
-	enum4linux -w $domain -u $domain\\$user -p $pass $target -a -r 2>/dev/null | tee $outfn
+	enum4linux -w $domain -u $domain\\$user -p $pass $target -a -r 2>/dev/null | sed "s/$pass/redacted/g"| tee $outfn
     else
 	enum4linux $target -a -r 2>/dev/null | tee $outfn
     fi
 
     # smbmap
-    if [ -n "$domain" ] && [ -n "$user" ] && [ -n "$pass" ] && [ -n "$dchost" ] ; then
+    if [ -n "$domain" ] && [ -n "$user" ] && [ -n "$pass" ] ; then
 	fn=output/out.smbmap.$target
 	# smbmap -H $target -u $user -d $domain -p $pass | tee $fn
-	if [ -n "$dchost" ] ; then
-	    cme smb -u $user -d $domain -p $pass --kdcHost $dchost --shares --sessions --loggedon-users --pass-pol --sam $target | tee $fn
-	else
-	    smbmap -H $target -u $user -d $domain -p $pass | tee $fn
+
+	# the docker image installs cme via pipx
+	cme=`which cme`
+	if [ -z "$cme" ] ; then
+	    cme=/root/.local/pipx/venvs/crackmapexec/bin/cme
 	fi
+	
+	$cme smb -u $user -d $domain -p $pass --shares --sessions --loggedon-users --pass-pol --sam $target| sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g" | sed "s/$pass/redacted/g" | tee $fn
 	# copy to the output file
 	cat $fn >> $outfn
-	disks=`grep -A 10000 Disk $fn |grep -v Disk|grep -v -- ----|awk '{print $1}'`
+	disks=`$cme smb -u $user -d $domain -p $pass --shares --sam $target | sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g" | sed "s/$pass/redacted/g" | grep -A 500 -- -----------|grep -v -- ----------- | awk '{print $5}' `
 	for disk in $disks ; do
-	    smbmap -H $target -u $user -d $domain -p $pass -r $disk| tee -a $outfn
+	    smbmap -H $target -u $user -d $domain -p $pass -r $disk | sed "s/$pass/redacted/g"| tee -a $outfn
 	done
     fi
 done
