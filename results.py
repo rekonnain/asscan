@@ -278,7 +278,7 @@ class Results:
                     scantype = entry['scantype']
                     if scantype == 'ffuf':
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'file': fname, 'results': entry['output']['results']}]}
-                    elif scantype == 'bluekeep' or scantype == 'ms17_010':
+                    elif scantype in ['bluekeep', 'ms12_020', 'ms17_010', 'cve_2021_1675']:
                         obj = {'ipv4': host, 'scantype': scantype, 'ports': [{'port': port, 'status': entry['status']}]}
                     elif fname == '' or os.stat(fname).st_size == 0:
                         continue
@@ -314,5 +314,3 @@ if __name__=='__main__':
     r = Results()
     r.read_all(sys.argv[1])
     print(json.dumps(r.hosts, indent=4, sort_keys=True))
-    foo={'a':1, 'b': 2, 'c': {'foo':'bar','asdfasdf':'kikkeli', 'xyz': { 'a':'b'}}, 'd': ['hihi','haha','hoho']}
-    print(dict2str(foo))

@@ -24,10 +24,16 @@ mkdir -p output
 for target in $targets;do
     outfn=output/out.enum.$target
     #enum4linux
+    # first, unauth, as authenticated fails if the creds are not valid
+    echo Unauthenticated scan: >> $outfn
+
+    enum4linux $target -a -r 2>/dev/null | grep -v 'Working on it' | tee $outfn
+
+    echo >> $outfn
+    echo Authenticated scan: >> $outfn
+    
     if [ -n "$domain" ] && [ -n "$user" ] && [ -n "$pass" ] ; then
-	enum4linux -w $domain -u $domain\\$user -p $pass $target -a -r 2>/dev/null | sed "s/$pass/redacted/g"| tee $outfn
-    else
-	enum4linux $target -a -r 2>/dev/null | tee $outfn
+	enum4linux -w $domain -u $domain\\$user -p $pass $target -a -r 2>/dev/null | grep -v 'Working on it'| sed "s/$pass/redacted/g"| tee -a $outfn
     fi
 
     # smbmap

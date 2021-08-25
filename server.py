@@ -464,6 +464,20 @@ def forkjobs(jobspec):
             hostkeys = list(hosts.keys())
             job = Ms12_020(hostkeys)
             forkjob(job, scraperqueue)
+        elif typ == 'cve_2021_1675':
+            # Fetch results for target subnet, only screenshot those with open ports
+            port = '445'
+            r = Results()
+            r.read_all('results')
+            hosts = r.hosts
+            hosts = filter_by_network(hosts, target, mask)
+            if foundonly:
+                sys.stderr.write('0: %s\n'%str(list(hosts.keys())))
+                hosts = filter_by_port(hosts, port)
+                sys.stderr.write('1: %s\n'%str(list(hosts.keys())))
+            hostkeys = list(hosts.keys())
+            job = Printnightmare(hostkeys, domain=domain, user=user, password=password)
+            forkjob(job, scraperqueue)
         elif typ == 'sleep':
             job = SleepJob()
             forkjob(job, nmapqueue)

@@ -48,7 +48,7 @@
           </span>
           </b>
       </p>
-      <div v-if="result['scantype'] == 'bluekeep'  || result['scantype'] == 'ms17_010'">
+      <div v-if="result['scantype'] == 'bluekeep'  || result['scantype'] == 'ms17_010' || result['scantype'] == 'cve_2021_1675' || result['scantype'] == 'ms12_020'">
         <div v-for="(portvals) in result['ports']" :key="portvals">
           <PortSummary :values="portvals" :ip="results[0]['ipv4']" class="mt-6" />
           <PortDetails :values="portvals" />

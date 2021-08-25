@@ -123,6 +123,16 @@
             class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
           />MS12-020
         </div>
+        <div class="m-1 focus:outline-none focus:shadow-outline">
+          <input
+            type="checkbox"
+            name="scantype"
+            value="cve_2021_1675"
+            v-model="values.cve_2021_1675"
+          v-on:change="changeHandler"
+            class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
+          />CVE-2021-1675 aka Printnightmare
+        </div>
       </div>
 
       <div class="mt-4 flex items-center justify-between">
@@ -333,6 +343,7 @@ export default {
         bluekeep: false,
         ms17_010: false,
         ms12_020: false,
+        cve_2021_1675: false,
         onlyfound: false,
       },
     };
@@ -383,6 +394,7 @@ export default {
         this.values.bluekeep = false;
         this.values.ms17_010 = false;
         this.values.ms12_020 = false;
+        this.values.cve_2021_1675 = false;
     },
 
     createpayload() {
@@ -452,6 +464,9 @@ export default {
       }
       if (this.values.ms12_020) {
         scantypes.push("ms12_020");
+      }
+      if (this.values.cve_2021_1675) {
+        scantypes.push("cve_2021_1675");
       }
 
 

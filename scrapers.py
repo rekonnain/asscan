@@ -384,6 +384,58 @@ class Ms12_020(ScraperJob):
         open('info.json','w').write(json.dumps(meta, indent=4,sort_keys=True))
         f.close()
 
+class Printnightmare(ScraperJob):
+    def __init__(self, targets, processes=4, domain=None, user=None, password=None):
+        super().__init__()
+        self.targets = targets
+        self.path = 'results'
+        self.scantype='cve_2021_1675'
+        self.targets = targets
+        self.domain = domain
+        self.user = user
+        self.password = password
+    
+    def scan(self):
+        self.port = '445'
+        os.chdir(self.path)
+        try:
+            os.mkdir(self.ident)
+        except:
+            pass
+        os.chdir(self.ident)
+
+        targetqueue = Queue(maxsize = 8)
+        commandline = '../../scanners/printnightmare.sh %s %s %s %s > output.txt'%(self.domain, self.user, self.password, ' '.join(self.targets))
+        log(commandline)
+        os.system(commandline)
+        self.postprocess()
+        sys.stderr.write("cve_2021_1675 task done\n")
+
+    def postprocess(self):
+        results = []
+        #line looks like:
+        # [*] 192.168.9.5:3389 - Cannot reliably check exploitability.
+        re_shit = re.compile('\[.\]\s([^:]*):[0-9]+\s+-\s(.*)')
+        hostresults = collections.defaultdict(list)
+        for line in open('output.txt','r').readlines():
+            m = re_shit.match(line.strip())
+            if m and m.groups():
+                hostresults[m.groups()[0]].append(m.groups()[1])
+        for key in hostresults.keys():
+            results.append({'host': key, 'scantype': 'cve_2021_1675', 'status': '\n'.join(hostresults[key]), 'port': self.port})
+            
+        f = open('results.json','w')
+        f.write(json.dumps(results, indent=4, sort_keys=True))
+        meta = { 'scantype': 'cve_2021_1675',
+                 'jobid': self.ident,
+                 'target': self.targets,
+                 'domain': self.domain,
+                 'user': self.user,
+                 'pass': 'redacted',
+                 'port': self.port }
+        open('info.json','w').write(json.dumps(meta, indent=4,sort_keys=True))
+        f.close()
+        
 class Wappalyzer(ScraperJob):
     def __init__(self, targets, scheme='http', port='80', processes=4):
         super().__init__()
