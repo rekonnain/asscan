@@ -93,9 +93,31 @@ def filter_by_ms17010(hosts):
                 #sys.stderr.write(scan['ports'][0]['status'] + '\n')
     return filtered
 
+def filter_by_ms12020(hosts):
+    filtered = {}
+    for key in hosts.keys():
+        for scan in hosts[key]:
+            if scan['scantype'] == 'ms12_020'\
+                 and 'vulnerable' in scan['ports'][0]['status'].lower() and 'not' not in scan['ports'][0]['status'].lower(): #yolo might work
+                filtered[key] = hosts[key]
+                #sys.stderr.write(scan['ports'][0]['status'] + '\n')
+    return filtered
+
+def filter_by_cve_2021_1675(hosts):
+    filtered = {}
+    for key in hosts.keys():
+        for scan in hosts[key]:
+            if scan['scantype'] == 'cve_2021_1675'\
+                 and 'target is vulnerable' in scan['ports'][0]['status'].lower():
+                filtered[key] = hosts[key]
+                #sys.stderr.write(scan['ports'][0]['status'] + '\n')
+    return filtered
+
 def filter_by_vulns(hosts):
     filtered = filter_by_ms17010(hosts)
     filtered.update(filter_by_bluekeep(hosts))
+    filtered.update(filter_by_ms12020(hosts))
+    filtered.update(filter_by_cve_2021_1675(hosts))
     return filtered
     
 def filter_by_screenshots(hosts):
