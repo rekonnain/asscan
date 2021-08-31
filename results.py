@@ -128,6 +128,92 @@ def filter_by_screenshots(hosts):
                 filtered[key] = hosts[key]
     return filtered
 
+def filter_by_shares(hosts, readable=False, writable=False):
+    filtered = {}
+    for key in hosts.keys():
+        ss = smbsummary(hosts, key)
+        if ss and 'shares' in ss.keys():
+            for s in ss['shares']:
+                if 'read' in s['permissions'].lower() and readable:
+                    filtered[key] = hosts[key]
+                if 'write' in s['permissions'].lower() and writable:
+                    filtered[key] = hosts[key]
+    return filtered
+                        
+
+def smbmap_output(hosts, ipaddr):
+    ret = []
+    for scan in hosts[ipaddr]:
+        if scan['scantype'] == 'smbenum':
+            smbscan = scan['ports'][0] # it's always a list of length 1
+            output = open(smbscan['file'], 'r').read()
+            ret.append(output)
+    return ret
+
+def smbmap_outputs(hosts):
+    outputs = defaultdict(list)
+    for key in hosts.keys():
+        for scan in hosts[key]:
+            if scan['scantype'] == 'smbenum':
+                smbscan = scan['ports'][0] # it's always a list of length 1
+                output = open(smbscan['file'], 'r').read()
+                outputs[key].append(output)
+    return outputs
+
+# perly function (i wrote it, won't attempt to read again)
+def summary_from_smbscan(scanstr): #scanstr is a string with raw smbscan output
+    r = {}
+    lines = [x.strip() for x in scanstr.split('\n')]
+    lines = filter(lambda x: not 'Working on it' in x, lines)
+    shares = []
+    insharelist=False
+
+    # SMB         192.168.10.1    445    XXXDS01          Share           Permissions     Remark
+    sharenameindex = 0
+    permissionsindex = 0
+    remarkindex = 0
+    for l in lines:
+        if 'name:' in l and 'domain:' in l:
+            ex=re.compile('.*\[\*\]\s([^(]+)\s\(name:([^)]+)\)\s\(domain:([^)]+)\).*')
+            m = ex.match(l)
+            if m:
+                r['osversion'] = m[1]
+                r['name'] = m[2]
+                r['domain'] = m[3]
+        if l.startswith('Domain Name: '):
+            r['domain'] = l.split(': ', 1)[-1].strip()
+        if '[+] Enumerated shares' in l:
+            insharelist=True
+            continue
+        if insharelist and 'Permissions' in l:
+            sharenameindex = l.index('Share')
+            permissionsindex = l.index('Permissions')
+            remarkindex = l.index('Remark')
+            continue
+        if insharelist and 'Permissions' not in l and '------' not in l and '[+]' not in l:
+            sharename = l[sharenameindex:permissionsindex-2].strip()
+            permissions = l[permissionsindex:remarkindex-2].strip()
+            remark = l[remarkindex:].strip()
+            share = {'name': sharename,
+                     'permissions': permissions,
+                     'remark': remark}
+            shares.append(share)
+            continue
+        if '[+] Enumerated' in l:
+            break
+    if len(shares) > 0:
+        r['shares'] = shares
+    return r
+
+def smbsummary(hosts, ip):
+    smb = smbmap_output(hosts, ip)
+    foo = {}
+    for x in smb:
+        su = summary_from_smbscan(x)
+        foo.update(summary_from_smbscan(x))
+    return foo
+
+
 # recursively checks if any string value contains content
 def match_leaf(d, content):
     tip = True
@@ -200,7 +286,16 @@ def get_results_for_ip(ip):
     r = Results()
     r.read_all('results')
     if ip in r.hosts.keys():
-        return {ip: latest_only(r.hosts[ip])}
+        ret = {ip: latest_only(r.hosts[ip])}
+        # postprocess smb results if any
+        smb = smbmap_output(r.hosts, ip)
+        foo = {}
+        for x in smb:
+            foo.update(summary_from_smbscan(x))
+            #print(json.dumps(foo, indent=4))
+        ret[ip].append({'scantype': 'smbinfo',
+                        'smbinfo': foo})
+        return ret
     else:
         return {}
 

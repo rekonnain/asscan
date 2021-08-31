@@ -6,7 +6,13 @@ import results
 def report(dir):
     r = results.Results()
     r.read_all(dir)
-    print("Hosts vulnerable to Bluekeep:")
+    print("Hosts with readable shares:")
+    for key in results.filter_by_shares(r.hosts, readable=True, writable=False):
+        print('  %s'%key)
+    print("\nHosts with writable shares:")
+    for key in results.filter_by_shares(r.hosts, readable=False, writable=True):
+        print('  %s'%key)
+    print("\nHosts vulnerable to Bluekeep:")
     for key in results.sorted_addresses(results.filter_by_bluekeep(r.hosts).keys()):
         print('  %s'%key)
     print('\nHosts vulnerable to MS17-010:')

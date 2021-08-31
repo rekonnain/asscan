@@ -97,7 +97,9 @@ export default {
       contentfilter: "",
       vulnsEnabled: false,
       hasNotes: false,
-      screenshotsEnabled: false
+      screenshotsEnabled: false,
+      hasReadableShares: false,
+      hasReadwriteShares: false
     };
   },
   methods: {
@@ -135,6 +137,12 @@ export default {
       this.$store.dispatch({
         type: type.setScreenshots,
         screenshots: screenshotsEnabled
+      });
+    },
+    readableShares(readableSharesEnabled) {
+      this.$store.dispatch({
+        type: type.setReadableShares,
+        readableShares: readableSharesEnabled
       });
     },
     notes(hasNotes) {

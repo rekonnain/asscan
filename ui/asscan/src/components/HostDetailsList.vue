@@ -110,6 +110,9 @@
       <div v-if="result['scripts']">
         <KeyValueTable :values="result['scripts']"/>
       </div>
+      <div v-if="result['smbinfo']">
+        <KeyValueTable :values="result['smbinfo']"/>
+      </div>
       <div v-if="result['osmatches']" class="mt-8">
         <p>Guessed operating system:</p>
         <div v-for="osmatches in result['osmatches']" :key="osmatches['name']">

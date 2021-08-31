@@ -14,7 +14,9 @@ td {
       <td class="align-top w-3/4 md:overflow-x-scroll" v-if="typeof val === 'string'">
         <pre class="text-xs">{{val}}</pre>
       </td>
-      <td v-else>x</td>
+      <td v-else>
+        <KeyValueTable :values="val"/>
+      </td>
     </tr>
   </table>
 </template>
