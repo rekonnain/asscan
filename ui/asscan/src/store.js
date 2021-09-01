@@ -11,6 +11,8 @@ export default new Vuex.Store({
         contentFilter: '',
         vulns: false,
         screenshots: false,
+        readableShares: false,
+        readwriteShares: false,
         notes: false,
     },
 
@@ -22,6 +24,8 @@ export default new Vuex.Store({
         vulns: state => state.vulns,
         screenshots: state => state.screenshots,
         notes: state => state.notes,
+        readableShares: state => state.readableShares,
+        readwriteShares: state => state.readwriteShares
     },
 
     actions: {
@@ -48,6 +52,12 @@ export default new Vuex.Store({
         },
         setNotes(context, value) {
             context.commit('setNotes', value.notes)
+        },
+        setReadableShares(context, value) {
+            context.commit('setReadableShares', value.readableShares)
+        },
+        setReadwriteShares(context, value) {
+            context.commit('setReadwriteShares', value.readwriteShares)
         },
         refresh(context) {
             context.commit('refresh')
@@ -79,6 +89,12 @@ export default new Vuex.Store({
         },
         setNotes(state, notes) {
             state.notes = notes;
+        },
+        setReadableShares(state, readableShares) {
+            state.readableShares = readableShares;
+        },
+        setReadwriteShares(state, readwriteShares) {
+            state.readwriteShares = readwriteShares;
         },
         refresh() { }
     },

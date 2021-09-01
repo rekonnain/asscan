@@ -53,6 +53,12 @@ export default {
     },
     content() {
       return this.$store.state.contentFilter
+    },
+    readableShares() {
+      return this.$store.data.readableShares
+    },
+    readwriteShares() {
+      return this.$store.data.readwriteShares
     }
   },
   methods: {
@@ -85,7 +91,9 @@ export default {
           this.$store.state.vulns +
           "&screenshots=" +
           this.$store.state.screenshots +
-          "&notes=" + this.$store.state.notes
+          "&notes=" + this.$store.state.notes +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -102,7 +110,9 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
-          + "&content=" + this.$store.state.contentFilter
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -119,7 +129,9 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
-          + "&content=" + this.$store.state.contentFilter
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -136,7 +148,9 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
-          + "&content=" + this.$store.state.contentFilter
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -153,7 +167,9 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + notes
-          + "&content=" + this.$store.state.contentFilter
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -171,7 +187,9 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
-          + "&content=" + this.$store.state.contentFilter
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
       );
       this.hosts = hostlist.data["ips"];
     },
@@ -188,7 +206,47 @@ export default {
           "&screenshots=" +
           this.$store.state.screenshots +
           "&notes=" + this.$store.state.notes
-          + "&content=" + this.$store.state.contentFilter
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
+      );
+      this.hosts = hostlist.data["ips"];
+    },
+    async updateWithReadableShares(readableShares) {
+      const hostlist = await axios.get(
+        "/api/results/filter?port=" +
+          this.$store.state.portFilter +
+          "&prefix=" +
+          this.$store.state.prefixFilter +
+          "&service=" +
+          this.$store.state.serviceFilter +
+          "&vulns=" +
+          this.$store.state.vulns +
+          "&screenshots=" +
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + readableShares +
+          "&readwriteshares=" + this.$store.state.readwriteShares
+      );
+      this.hosts = hostlist.data["ips"];
+    },
+    async updateWithReadwriteShares(readwriteShares) {
+      const hostlist = await axios.get(
+        "/api/results/filter?port=" +
+          this.$store.state.portFilter +
+          "&prefix=" +
+          this.$store.state.prefixFilter +
+          "&service=" +
+          this.$store.state.serviceFilter +
+          "&vulns=" +
+          this.$store.state.vulns +
+          "&screenshots=" +
+          this.$store.state.screenshots +
+          "&notes=" + this.$store.state.notes
+          + "&content=" + this.$store.state.contentFilter +
+          "&readableshares=" + this.$store.state.readableShares +
+          "&readwriteshares=" + readwriteShares
       );
       this.hosts = hostlist.data["ips"];
     }
@@ -210,7 +268,6 @@ export default {
       this.updateWithNotes(notes);
     },
     content(content) {
-      console.log('slerba')
       this.updateWithContent(content);
     },
     refresh() {

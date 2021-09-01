@@ -92,10 +92,12 @@ class ResultsHandler(tornado.web.RequestHandler):
             port = self.get_query_argument('port', None)
             service = self.get_query_argument('service', None)
             vulns = self.get_query_argument('vulns', None)
+            readable_shares = self.get_query_argument('readableshares', None)
+            readwrite_shares = self.get_query_argument('readwriteshares', None)
             screenshots = self.get_query_argument('screenshots', None)
             notes = self.get_query_argument('notes', None)
             content = self.get_query_argument('content', None)
-            sys.stderr.write('filtering: prefix=%s port=%s service=%s vulns=%s screenshots=%s content=%s\n'%(str(prefix), str(port), str(service), str(vulns), str(screenshots), str(content)))
+            log('filtering: prefix=%s port=%s service=%s vulns=%s screenshots=%s content=%s readableshares=%s readwriteshares=%s\n'%(str(prefix), str(port), str(service), str(vulns), str(screenshots), str(content), str(readable_shares), str(readwrite_shares)))
             r = Results()
             r.read_all('results')
             filtered = r.hosts
@@ -114,6 +116,12 @@ class ResultsHandler(tornado.web.RequestHandler):
             if vulns and vulns == 'true':
                 filtered = filter_by_vulns(filtered)
                 sys.stderr.write('count vulns=%d\n'%(len(filtered.keys())))
+            if readable_shares and readable_shares == 'true':
+                filtered = filter_by_shares(filtered, readable = True, writable = False)
+                sys.stderr.write('count readable_shares=%d\n'%(len(filtered.keys())))
+            if readwrite_shares and readwrite_shares == 'true':
+                filtered = filter_by_shares(filtered, readable = False, writable = True)
+                sys.stderr.write('count readwrite_shares=%d\n'%(len(filtered.keys())))
             if screenshots and screenshots == 'true':
                 filtered = filter_by_screenshots(filtered)
                 sys.stderr.write('count screenshots=%d\n'%(len(filtered.keys())))

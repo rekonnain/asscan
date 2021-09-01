@@ -65,6 +65,22 @@
         @click="notes(hasNotes)"
       />Has notes
     </div>
+    <div class="text-black py-1 px-2 m-2 rounded focus:outline-none focus:shadow-outline">
+      <input
+        type="checkbox"
+        class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
+        v-model="hasReadableShares"
+        @click="setReadableShares(hasReadableShares)"
+      />Read only shares
+    </div>
+    <div class="text-black py-1 px-2 m-2 rounded focus:outline-none focus:shadow-outline">
+      <input
+        type="checkbox"
+        class="mr-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-l"
+        v-model="hasReadwriteShares"
+        @click="setReadwriteShares(hasReadwriteShares)"
+      />Read/write shares
+    </div>
 
     <button
       type="button"
@@ -145,6 +161,12 @@ export default {
         readableShares: readableSharesEnabled
       });
     },
+    readwriteShares(readwriteSharesEnabled) {
+      this.$store.dispatch({
+        type: type.setReadwriteShares,
+        readwriteShares: readwriteSharesEnabled
+      });
+    },
     notes(hasNotes) {
       this.$store.dispatch({
         type: type.setNotes,
@@ -183,7 +205,15 @@ export default {
       this.$store.dispatch({
         type: type.setNotes,
         notes: false
-      })
+      });
+      this.$store.dispatch({
+        type: type.setReadableShares,
+        readableShares: false
+      });
+      this.$store.dispatch({
+        type: type.setReadwriteShares,
+        readwriteShares: false
+      });
     },
     apply() {
       console.log("apply");
@@ -215,7 +245,16 @@ export default {
       this.$store.dispatch({
         type: type.setNotes,
         notes: this.hasNotes
-      })
+      });
+      this.$store.dispatch({
+        type: type.setReadableShares,
+        readableShares: this.hasReadableShares
+      });
+      this.$store.dispatch({
+        type: type.setReadwriteShares,
+        readwriteShares: this.hasReadwriteShares
+      });
+
     },
     refresh() {
       this.$store.dispatch({
