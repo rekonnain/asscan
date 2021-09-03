@@ -4,7 +4,7 @@ services:
   ass:
     build: .
     ports:
-      - "8888:8888"  # remember to make sure the app listens to 0.0.0.0
+      - "127.0.0.1:8888:8888"  # remember to make sure the app listens to 0.0.0.0
     volumes:
       - type: bind
         source: ./results
