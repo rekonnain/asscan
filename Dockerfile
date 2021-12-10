@@ -24,3 +24,4 @@ ADD ui /ass/ui
 ADD scanners /ass/scanners
 RUN mkdir -p /ass/results
 RUN chmod +x ./ass/server.py
+CMD [ "sh", "-c",  "cd ass;./server.py 8888 0.0.0.0" ]
