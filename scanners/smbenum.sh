@@ -41,16 +41,16 @@ for target in $targets;do
 	fn=output/out.smbmap.$target
 	# smbmap -H $target -u $user -d $domain -p $pass | tee $fn
 
-	# the docker image installs cme via pipx
-	cme=`which cme`
-	if [ -z "$cme" ] ; then
-	    cme=/root/.local/pipx/venvs/crackmapexec/bin/cme
+    # this used to be from pip but now
+	crackmapexec=`which crackmapexec`
+	if [ -z "$crackmapexec" ] ; then
+	    crackmapexec=/root/.local/pipx/venvs/crackmapexec/bin/crackmapexec
 	fi
 	
-	$cme smb -u $user -d $domain -p $pass --shares --sessions --loggedon-users --pass-pol --sam $target| sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g" | sed "s/$pass/redacted/g" | tee $fn
+	$crackmapexec smb -u $user -d $domain -p $pass --shares --sessions --loggedon-users --pass-pol --sam $target| sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g" | sed "s/$pass/redacted/g" | tee $fn
 	# copy to the output file
 	cat $fn >> $outfn
-	disks=`$cme smb -u $user -d $domain -p $pass --shares --sam $target | sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g" | sed "s/$pass/redacted/g" | grep -A 500 -- -----------|grep -v -- ----------- | awk '{print $5}' `
+	disks=`$crackmapexec smb -u $user -d $domain -p $pass --shares --sam $target | sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g" | sed "s/$pass/redacted/g" | grep -A 500 -- -----------|grep -v -- ----------- | awk '{print $5}' `
 	for disk in $disks ; do
 	    smbmap -H $target -u $user -d $domain -p $pass -r $disk | sed "s/$pass/redacted/g"| tee -a $outfn
 	done
