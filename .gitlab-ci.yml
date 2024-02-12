@@ -1,0 +1,38 @@
+include:
+  - project: "mc-public/ci-templates"
+    ref: "main"
+    file: "gitlab-ci-base.yml"
+
+variables:
+  # this makes the shared CI/CD runner to take these jobs
+  GL_RUNNER_TAG: sharedcluster
+
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+  IMAGE_TAG_TEST: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID-test
+  CACHE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-cache
+
+
+stages:
+#  - test
+  - build
+
+#pytest:
+#  tags:
+#    - $GL_RUNNER_TAG
+#  image: python:3.12-slim
+#  stage: test
+#  script:
+#    - export POETRY_HOME=/opt/poetry
+#    - python3 -m venv $POETRY_HOME
+#    - $POETRY_HOME/bin/pip install poetry
+#    - $POETRY_HOME/bin/poetry install
+#    - $POETRY_HOME/bin/poetry run pytest
+
+
+
+build:
+  stage: build
+  extends: .build_image_base
+  variables: {}
+
+

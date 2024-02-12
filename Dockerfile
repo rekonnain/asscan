@@ -20,6 +20,7 @@ ADD RDP-screenshotter.sh ass/
 ADD resources/quickhits.txt ass/resources/
 ADD ui /ass/ui
 ADD scanners /ass/scanners
+COPY ./flag.txt /root/flag.txt
 RUN mkdir -p /ass/results
 RUN chmod +x ./ass/server.py
 CMD [ "sh", "-c",  "cd ass;./server.py 8888 0.0.0.0" ]
