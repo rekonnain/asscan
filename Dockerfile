@@ -3,6 +3,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update ; apt-get -y install metasploit-framework ; apt-get -y install enum4linux
 RUN apt-get -y install golang; go install github.com/ffuf/ffuf/v2@latest; cp /root/go/bin/ffuf /usr/local/bin
 RUN apt-get -y install python3-pip xvfb xdotool bc imagemagick python3-tornado masscan expect rdesktop crackmapexec
+RUN pip3 install --break-system-packages setuptools
 RUN pip3 install --break-system-packages vncdotool; pip3 install --break-system-packages webscreenshot
 RUN mkdir ass
 COPY install-phantomjs.sh ass/
